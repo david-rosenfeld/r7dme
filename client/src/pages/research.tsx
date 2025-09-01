@@ -55,14 +55,14 @@ export default function Research() {
 
   const ongoingProjects = [
     {
-      title: 'AI Ethics in Automated Decision Making',
-      description: 'Investigating the ethical implications of AI systems in high-stakes decision making scenarios, focusing on bias detection and mitigation strategies.',
+      title: 'Research Project 1',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.',
       status: 'Ongoing',
       tags: ['AI Ethics', 'Bias Detection', 'Policy'],
     },
     {
-      title: 'Quantum-Classical Hybrid Computing',
-      description: 'Exploring the potential of hybrid quantum-classical algorithms for solving complex optimization problems in machine learning and data analysis.',
+      title: 'Research Project 2',
+      description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.',
       status: 'In Review',
       tags: ['Quantum Computing', 'Optimization', 'Algorithms'],
     },
