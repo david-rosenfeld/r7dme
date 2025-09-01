@@ -3,32 +3,32 @@ import { Card } from '@/components/ui/card';
 
 export default function About() {
   const skills = [
-    { category: 'Frontend', technologies: 'React, Vue.js, TypeScript' },
-    { category: 'Backend', technologies: 'Node.js, Python, PostgreSQL' },
-    { category: 'ML/AI', technologies: 'TensorFlow, PyTorch, Scikit-learn' },
-    { category: 'Cloud', technologies: 'AWS, Docker, Kubernetes' },
-    { category: 'Research', technologies: 'Statistical Analysis, Data Mining' },
-    { category: 'Tools', technologies: 'Git, VS Code, Jupyter' },
+    { category: 'Skill 1', technologies: 'Lorem ipsum, dolor sit, amet consectetur' },
+    { category: 'Skill 2', technologies: 'Adipiscing elit, sed do, eiusmod tempor' },
+    { category: 'Skill 3', technologies: 'Incididunt ut, labore et, dolore magna' },
+    { category: 'Skill 4', technologies: 'Aliqua ut enim, ad minim, veniam quis' },
+    { category: 'Skill 5', technologies: 'Nostrud exercitation, ullamco laboris, nisi ut' },
+    { category: 'Skill 6', technologies: 'Aliquip ex ea, commodo consequat, duis aute' },
   ];
 
   const experiences = [
     {
-      title: 'Senior Software Engineer',
-      company: 'Tech Company Inc.',
+      title: 'Senior Position Title',
+      company: 'Example Company Inc.',
       period: '2022 - Present',
-      description: 'Leading development of scalable web applications and machine learning solutions. Collaborating with cross-functional teams to deliver high-impact features.',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.',
     },
     {
-      title: 'Research Associate',
-      company: 'University Research Lab',
+      title: 'Mid-Level Position',
+      company: 'Sample Organization',
       period: '2020 - 2022',
-      description: 'Conducted research in artificial intelligence and published papers in top-tier conferences. Mentored graduate students and collaborated on interdisciplinary projects.',
+      description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.',
     },
     {
-      title: 'Full Stack Developer',
-      company: 'Startup Solutions',
+      title: 'Junior Role Title',
+      company: 'Placeholder Corp',
       period: '2018 - 2020',
-      description: 'Developed and maintained web applications using modern technologies. Worked in an agile environment to deliver features quickly and efficiently.',
+      description: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae.',
     },
   ];
 
@@ -57,13 +57,13 @@ export default function About() {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           <p className="text-lg text-muted-foreground mb-6" data-testid="text-about-description-1">
-            I'm a passionate developer and researcher with a keen interest in creating innovative solutions that bridge the gap between technology and human needs. My work spans across multiple disciplines, combining technical expertise with research methodologies to solve complex problems.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
           </p>
           <p className="text-lg text-muted-foreground mb-6" data-testid="text-about-description-2">
-            With a background in computer science and years of experience in both industry and academia, I've developed a unique perspective on how technology can be leveraged to create meaningful impact. I'm particularly interested in machine learning, web development, and user experience design.
+            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
           </p>
           <p className="text-lg text-muted-foreground" data-testid="text-about-description-3">
-            When I'm not coding or researching, you can find me exploring new technologies, contributing to open source projects, or sharing knowledge through writing and speaking at conferences.
+            Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
           </p>
         </motion.div>
 
