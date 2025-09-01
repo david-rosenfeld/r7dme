@@ -68,7 +68,7 @@ export function Sidebar({ className }: SidebarProps) {
             </button>
           </h1>
           <p className="text-muted-foreground text-lg mb-8" data-testid="text-subtitle">
-            Developer & Researcher
+            Platform Engineer & Doctoral Student
           </p>
 
           {/* Navigation */}
