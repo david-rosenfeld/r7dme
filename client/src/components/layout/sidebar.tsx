@@ -1,6 +1,7 @@
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
-import { Github, Linkedin, Menu, X } from 'lucide-react';
+import { Github, Menu, X } from 'lucide-react';
+import { SiLinkedin } from 'react-icons/si';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -114,7 +115,7 @@ export function Sidebar({ className }: SidebarProps) {
               whileTap={{ scale: 0.95 }}
               data-testid="link-linkedin"
             >
-              <Linkedin className="w-6 h-6" />
+              <SiLinkedin className="w-6 h-6" />
             </motion.a>
           </div>
         </div>
