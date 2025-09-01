@@ -6,9 +6,8 @@ import { ExternalLink, Github } from 'lucide-react';
 export default function Projects() {
   const featuredProjects = [
     {
-      title: 'AI-Powered Analytics Platform',
-      description: 'A comprehensive analytics platform that leverages machine learning to provide real-time insights and predictive analytics for business intelligence.',
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600',
+      title: 'Project 1',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.',
       technologies: ['React', 'Python', 'TensorFlow', 'AWS'],
       links: {
         demo: '#',
@@ -16,9 +15,8 @@ export default function Projects() {
       },
     },
     {
-      title: 'Smart Health Tracker',
-      description: 'A mobile application that uses IoT sensors and machine learning to track health metrics and provide personalized recommendations for wellness.',
-      image: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600',
+      title: 'Project 2',
+      description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.',
       technologies: ['React Native', 'Node.js', 'IoT', 'MongoDB'],
       links: {
         demo: '#',
@@ -26,9 +24,8 @@ export default function Projects() {
       },
     },
     {
-      title: 'Open Source Research Tools',
-      description: 'A collection of open-source tools and libraries for data analysis and visualization, used by researchers worldwide for academic and commercial projects.',
-      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600',
+      title: 'Project 3',
+      description: 'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore.',
       technologies: ['Python', 'R', 'D3.js', 'Jupyter'],
       links: {
         demo: '#',
@@ -39,13 +36,13 @@ export default function Projects() {
 
   const otherProjects = [
     {
-      title: 'E-Commerce Platform',
-      description: 'Full-stack e-commerce solution with modern payment integration',
+      title: 'Project 4',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
       technologies: ['Next.js', 'Stripe'],
     },
     {
-      title: 'Chat Application',
-      description: 'Real-time messaging app with video call functionality',
+      title: 'Project 5',
+      description: 'Ut enim ad minim veniam, quis nostrud exercitation',
       technologies: ['Socket.io', 'WebRTC'],
     },
   ];
@@ -77,16 +74,8 @@ export default function Projects() {
               transition={{ duration: 0.6, delay: 0.1 * (index + 1) }}
             >
               <Card className="bg-card rounded-lg p-6 border border-border hover:border-primary/50 transition-all duration-300 group">
-                <div className="flex flex-col lg:flex-row gap-6">
-                  <div className="lg:w-1/3">
-                    <img
-                      src={project.image}
-                      alt={`${project.title} interface`}
-                      className="rounded-lg w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                      data-testid={`img-project-${index}`}
-                    />
-                  </div>
-                  <div className="lg:w-2/3">
+                <div className="flex flex-col gap-6">
+                  <div className="w-full">
                     <h3 className="text-2xl font-semibold mb-3 text-foreground" data-testid={`text-project-title-${index}`}>
                       {project.title}
                     </h3>

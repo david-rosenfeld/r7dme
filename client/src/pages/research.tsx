@@ -6,46 +6,46 @@ import { ExternalLink, FileText } from 'lucide-react';
 export default function Research() {
   const researchInterests = [
     {
-      title: 'Machine Learning for Healthcare',
-      description: 'Developing AI models to improve diagnostic accuracy and treatment personalization in medical applications.',
+      title: 'Area 1',
+      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     },
     {
-      title: 'Human-Computer Interaction',
-      description: 'Investigating new interaction paradigms and user experience design principles for emerging technologies.',
+      title: 'Area 2',
+      description: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     },
     {
-      title: 'Distributed Systems',
-      description: 'Research on scalable architectures and performance optimization for large-scale distributed applications.',
+      title: 'Area 3',
+      description: 'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.',
     },
     {
-      title: 'Privacy-Preserving AI',
-      description: 'Exploring techniques for training machine learning models while maintaining user privacy and data security.',
+      title: 'Area 4',
+      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
     },
   ];
 
   const publications = [
     {
-      title: 'Federated Learning for Privacy-Preserving Healthcare Analytics',
-      authors: 'D. Rosenfeld, A. Smith, B. Johnson (2024)',
-      venue: 'International Conference on Machine Learning (ICML)',
+      title: 'Lorem Ipsum Dolor Sit Amet: Consectetur Adipiscing Research',
+      authors: 'Lorem Author, Et Al. (2024)',
+      venue: 'Lorem Ipsum Conference Proceedings',
       links: {
         paper: '#',
         cite: '#',
       },
     },
     {
-      title: 'Adaptive User Interfaces: A Study on Context-Aware Design Patterns',
-      authors: 'D. Rosenfeld, C. Williams (2023)',
-      venue: 'ACM Transactions on Computer-Human Interaction',
+      title: 'Ut Enim Ad Minim Veniam: A Comprehensive Study on Lorem Techniques',
+      authors: 'Sample Researcher, Co-Author (2023)',
+      venue: 'Journal of Lorem Ipsum Studies',
       links: {
         paper: '#',
         cite: '#',
       },
     },
     {
-      title: 'Scalable Microservices Architecture for Real-Time Data Processing',
-      authors: 'D. Rosenfeld, M. Davis, K. Lee (2023)',
-      venue: 'IEEE Transactions on Cloud Computing',
+      title: 'Duis Aute Irure Dolor: Advanced Methods for Lorem Implementation',
+      authors: 'Example Writer, Research Team (2023)',
+      venue: 'International Lorem Ipsum Symposium',
       links: {
         paper: '#',
         cite: '#',
