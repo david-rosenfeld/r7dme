@@ -1,7 +1,7 @@
 import { useLocation } from 'wouter';
 import { motion } from 'framer-motion';
 import { Github, Menu, X } from 'lucide-react';
-import { SiLinkedin } from 'react-icons/si';
+import { SiLinkedin, SiX } from 'react-icons/si';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -116,6 +116,17 @@ export function Sidebar({ className }: SidebarProps) {
               data-testid="link-linkedin"
             >
               <SiLinkedin className="w-6 h-6" />
+            </motion.a>
+            <motion.a
+              href="https://x.com/davidrosenfeld"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary transition-colors"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              data-testid="link-x"
+            >
+              <SiX className="w-6 h-6" />
             </motion.a>
           </div>
         </div>
