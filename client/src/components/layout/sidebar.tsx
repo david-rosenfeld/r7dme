@@ -13,7 +13,6 @@ export function Sidebar({ className }: SidebarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { label: 'Home', href: '/' },
     { label: 'About', href: '/about' },
     { label: 'Projects', href: '/projects' },
     { label: 'Research', href: '/research' },
@@ -48,12 +47,12 @@ export function Sidebar({ className }: SidebarProps) {
         className={cn(
           "fixed lg:static inset-y-0 left-0 w-80 bg-card border-r border-border z-40 flex flex-col",
           "lg:translate-x-0",
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full",
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           className
         )}
         initial={false}
         animate={{
-          x: isMobileMenuOpen ? 0 : "-100%",
+          x: window.innerWidth >= 1024 ? 0 : (isMobileMenuOpen ? 0 : "-100%"),
         }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
       >
