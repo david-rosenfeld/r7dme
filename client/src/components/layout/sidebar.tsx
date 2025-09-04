@@ -4,6 +4,7 @@ import { Github, Menu, X } from 'lucide-react';
 import { SiLinkedin, SiX } from 'react-icons/si';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { ColorToggle } from '@/components/ui/color-toggle';
 
 interface SidebarProps {
   className?: string;
@@ -94,7 +95,8 @@ export function Sidebar({ className }: SidebarProps) {
 
         {/* Social Links */}
         <div className="mt-auto p-8">
-          <div className="flex space-x-4">
+          <div className="flex items-center justify-between">
+            <div className="flex space-x-4">
             <motion.a
               href="https://github.com/davidrosenfeld"
               target="_blank"
@@ -128,6 +130,8 @@ export function Sidebar({ className }: SidebarProps) {
             >
               <SiX className="w-6 h-6" />
             </motion.a>
+            </div>
+            <ColorToggle />
           </div>
         </div>
       </motion.div>

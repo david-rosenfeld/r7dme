@@ -9,6 +9,7 @@ import About from "@/pages/about";
 import Projects from "@/pages/projects";
 import Research from "@/pages/research";
 import NotFound from "@/pages/not-found";
+import { ThemeProvider } from "@/contexts/theme-context";
 
 function Router() {
   return (
@@ -28,8 +29,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <ThemeProvider>
+          <Toaster />
+          <Router />
+        </ThemeProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
