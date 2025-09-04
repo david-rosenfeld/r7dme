@@ -39,7 +39,7 @@ export function CursorGlow() {
 
   return (
     <div
-      className={`cursor-glow hidden lg:block transition-opacity duration-200 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+      className={`cursor-glow block transition-opacity duration-200 ${isVisible ? 'opacity-100' : 'opacity-0'}`}
       style={{
         left: position.x,
         top: position.y,
