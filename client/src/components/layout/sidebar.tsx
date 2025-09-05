@@ -47,7 +47,7 @@ export function Sidebar({ className }: SidebarProps) {
       {/* Sidebar */}
       <motion.div
         className={cn(
-          "fixed lg:static inset-y-0 left-0 w-40 bg-card border-r border-border z-40 flex flex-col",
+          "fixed lg:static inset-y-0 left-0 w-80 bg-card border-r border-border z-40 flex flex-col",
           "lg:translate-x-0",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           className
