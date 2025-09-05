@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExternalLink, FileText } from 'lucide-react';
+import { NetflixHoverGrid, NetflixHoverItem } from '@/components/effects/netflix-hover';
 
 export default function Research() {
   const researchInterests = [
@@ -96,25 +97,31 @@ export default function Research() {
           <h3 className="text-2xl font-semibold mb-6 text-foreground" data-testid="text-research-interests-title">
             Current Research Interests
           </h3>
-          <div className="grid md:grid-cols-2 gap-6">
+          <NetflixHoverGrid cols={2} className="gap-6">
             {researchInterests.map((interest, index) => (
-              <motion.div
+              <NetflixHoverItem
                 key={interest.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.1 * index }}
+                index={index}
+                totalItems={researchInterests.length}
+                cols={2}
               >
-                <Card className="bg-card p-6 rounded-lg border border-border hover:border-primary/50 transition-colors">
-                  <h4 className="text-lg font-semibold mb-3 text-foreground" data-testid={`text-interest-title-${index}`}>
-                    {interest.title}
-                  </h4>
-                  <p className="text-muted-foreground" data-testid={`text-interest-description-${index}`}>
-                    {interest.description}
-                  </p>
-                </Card>
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 * index }}
+                >
+                  <Card className="bg-card p-6 rounded-lg border border-border hover:border-primary/50 transition-colors h-full">
+                    <h4 className="text-lg font-semibold mb-3 text-foreground" data-testid={`text-interest-title-${index}`}>
+                      {interest.title}
+                    </h4>
+                    <p className="text-muted-foreground" data-testid={`text-interest-description-${index}`}>
+                      {interest.description}
+                    </p>
+                  </Card>
+                </motion.div>
+              </NetflixHoverItem>
             ))}
-          </div>
+          </NetflixHoverGrid>
         </motion.div>
 
         {/* Publications */}
