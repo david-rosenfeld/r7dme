@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { Github, Menu, X } from 'lucide-react';
 import { SiLinkedin, SiX } from 'react-icons/si';
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { ColorToggle } from '@/components/ui/color-toggle';
+import type { SiteSetting } from '@shared/schema';
 
 interface SidebarProps {
   className?: string;
@@ -19,6 +21,22 @@ export function Sidebar({ className }: SidebarProps) {
     { label: 'Projects', href: '/projects' },
     { label: 'Research', href: '/research' },
   ];
+
+  // Fetch social media URLs from CMS
+  const { data: socialSettings } = useQuery({
+    queryKey: ['/api/settings'],
+    queryFn: async (): Promise<SiteSetting[]> => {
+      const response = await fetch('/api/settings');
+      if (!response.ok) throw new Error('Failed to fetch settings');
+      return response.json();
+    }
+  });
+
+  // Helper function to get setting value by key
+  const getSocialUrl = (key: string): string => {
+    const setting = socialSettings?.find(s => s.key === key);
+    return setting?.value || '#';
+  };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -109,7 +127,7 @@ export function Sidebar({ className }: SidebarProps) {
           <div className="flex items-center justify-between">
             <div className="flex space-x-4">
             <motion.a
-              href="https://github.com/davidrosenfeld"
+              href={getSocialUrl('social_github_url')}
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
@@ -120,7 +138,7 @@ export function Sidebar({ className }: SidebarProps) {
               <Github className="w-6 h-6" />
             </motion.a>
             <motion.a
-              href="https://linkedin.com/in/davidrosenfeld"
+              href={getSocialUrl('social_linkedin_url')}
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
@@ -131,7 +149,7 @@ export function Sidebar({ className }: SidebarProps) {
               <SiLinkedin className="w-6 h-6" />
             </motion.a>
             <motion.a
-              href="https://x.com/davidrosenfeld"
+              href={getSocialUrl('social_x_url')}
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"

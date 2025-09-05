@@ -11,7 +11,10 @@ import {
   type InsertContentElement,
   type UpdateContentElement,
   type PageWithSections,
-  type SectionWithElements
+  type SectionWithElements,
+  type SiteSetting,
+  type InsertSiteSetting,
+  type UpdateSiteSetting
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -42,6 +45,13 @@ export interface IStorage {
   createElement(element: InsertContentElement): Promise<ContentElement>;
   updateElement(id: string, element: UpdateContentElement): Promise<ContentElement>;
   deleteElement(id: string): Promise<void>;
+
+  // Site Settings methods
+  getAllSettings(): Promise<SiteSetting[]>;
+  getSetting(key: string): Promise<SiteSetting | undefined>;
+  createSetting(setting: InsertSiteSetting): Promise<SiteSetting>;
+  updateSetting(key: string, setting: UpdateSiteSetting): Promise<SiteSetting>;
+  deleteSetting(key: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -49,12 +59,14 @@ export class MemStorage implements IStorage {
   private pages: Map<string, Page>;
   private pageSections: Map<string, PageSection>;
   private contentElements: Map<string, ContentElement>;
+  private siteSettings: Map<string, SiteSetting>;
 
   constructor() {
     this.users = new Map();
     this.pages = new Map();
     this.pageSections = new Map();
     this.contentElements = new Map();
+    this.siteSettings = new Map();
   }
 
   // User methods
@@ -239,6 +251,51 @@ export class MemStorage implements IStorage {
 
   async deleteElement(id: string): Promise<void> {
     this.contentElements.delete(id);
+  }
+
+  // Site Settings methods
+  async getAllSettings(): Promise<SiteSetting[]> {
+    return Array.from(this.siteSettings.values());
+  }
+
+  async getSetting(key: string): Promise<SiteSetting | undefined> {
+    return Array.from(this.siteSettings.values()).find(setting => setting.key === key);
+  }
+
+  async createSetting(insertSetting: InsertSiteSetting): Promise<SiteSetting> {
+    const id = randomUUID();
+    const now = new Date();
+    const setting: SiteSetting = { 
+      id, 
+      key: insertSetting.key,
+      value: insertSetting.value,
+      description: insertSetting.description ?? null,
+      updatedAt: now 
+    };
+    this.siteSettings.set(insertSetting.key, setting);
+    return setting;
+  }
+
+  async updateSetting(key: string, updateSetting: UpdateSiteSetting): Promise<SiteSetting> {
+    const existing = await this.getSetting(key);
+    if (!existing) throw new Error('Setting not found');
+    
+    const now = new Date();
+    const updated: SiteSetting = { 
+      ...existing, 
+      value: updateSetting.value ?? existing.value,
+      description: updateSetting.description !== undefined ? updateSetting.description : existing.description,
+      updatedAt: now 
+    };
+    this.siteSettings.set(existing.key, updated);
+    return updated;
+  }
+
+  async deleteSetting(key: string): Promise<void> {
+    const setting = await this.getSetting(key);
+    if (setting) {
+      this.siteSettings.delete(key);
+    }
   }
 }
 

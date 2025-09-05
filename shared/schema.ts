@@ -44,6 +44,14 @@ export const contentElements = pgTable("content_elements", {
   updatedAt: timestamp("updated_at").defaultNow()
 });
 
+export const siteSettings = pgTable("site_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
 // Zod schemas for validation
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -68,9 +76,15 @@ export const insertContentElementSchema = createInsertSchema(contentElements).om
   updatedAt: true
 });
 
+export const insertSiteSettingSchema = createInsertSchema(siteSettings).omit({
+  id: true,
+  updatedAt: true
+});
+
 export const updatePageSchema = insertPageSchema.partial();
 export const updatePageSectionSchema = insertPageSectionSchema.partial().omit({ pageId: true });
 export const updateContentElementSchema = insertContentElementSchema.partial().omit({ sectionId: true });
+export const updateSiteSettingSchema = insertSiteSettingSchema.partial().omit({ key: true });
 
 // Type definitions
 export type User = typeof users.$inferSelect;
@@ -87,6 +101,10 @@ export type UpdatePageSection = z.infer<typeof updatePageSectionSchema>;
 export type ContentElement = typeof contentElements.$inferSelect;
 export type InsertContentElement = z.infer<typeof insertContentElementSchema>;
 export type UpdateContentElement = z.infer<typeof updateContentElementSchema>;
+
+export type SiteSetting = typeof siteSettings.$inferSelect;
+export type InsertSiteSetting = z.infer<typeof insertSiteSettingSchema>;
+export type UpdateSiteSetting = z.infer<typeof updateSiteSettingSchema>;
 
 // Complex types for nested data
 export type PageWithSections = Page & {

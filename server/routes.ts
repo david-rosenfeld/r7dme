@@ -8,7 +8,9 @@ import {
   insertContentElementSchema,
   updatePageSchema,
   updatePageSectionSchema,
-  updateContentElementSchema
+  updateContentElementSchema,
+  insertSiteSettingSchema,
+  updateSiteSettingSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -30,6 +32,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(pages);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch pages" });
+    }
+  });
+
+  // Get all site settings
+  app.get("/api/settings", async (_req, res) => {
+    try {
+      const settings = await storage.getAllSettings();
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch settings" });
     }
   });
 
@@ -187,6 +199,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete element" });
+    }
+  });
+
+  // Site Settings management endpoints
+  app.post("/api/admin/settings", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertSiteSettingSchema.parse(req.body);
+      const setting = await storage.createSetting(validatedData);
+      res.status(201).json(setting);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create setting" });
+    }
+  });
+
+  app.put("/api/admin/settings/:key", requireAuth, async (req, res) => {
+    try {
+      const { key } = req.params;
+      const validatedData = updateSiteSettingSchema.parse(req.body);
+      const setting = await storage.updateSetting(key, validatedData);
+      res.json(setting);
+    } catch (error: any) {
+      if (error.message === 'Setting not found') {
+        return res.status(404).json({ error: "Setting not found" });
+      }
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update setting" });
+    }
+  });
+
+  app.delete("/api/admin/settings/:key", requireAuth, async (req, res) => {
+    try {
+      const { key } = req.params;
+      await storage.deleteSetting(key);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete setting" });
     }
   });
 

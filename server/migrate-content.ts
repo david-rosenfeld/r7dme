@@ -257,8 +257,28 @@ export async function migrateContent() {
       });
     }
 
+    // Create default site settings for social media links
+    await storage.createSetting({
+      key: 'social_github_url',
+      value: 'https://github.com',
+      description: 'GitHub profile URL'
+    });
+
+    await storage.createSetting({
+      key: 'social_linkedin_url',
+      value: 'https://linkedin.com/in/username',
+      description: 'LinkedIn profile URL'
+    });
+
+    await storage.createSetting({
+      key: 'social_x_url',
+      value: 'https://x.com/username',
+      description: 'X (Twitter) profile URL'
+    });
+
     console.log("Content migration completed successfully!");
     console.log(`Created ${await (await storage.getAllPages()).length} pages`);
+    console.log(`Created ${await (await storage.getAllSettings()).length} settings`);
 
   } catch (error) {
     console.error("Content migration failed:", error);

@@ -9,8 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { RefreshCw, Save, Plus, Trash2, Edit3 } from 'lucide-react';
-import type { PageWithSections, Page, PageSection, ContentElement } from '@shared/schema';
-import { apiRequest } from '@/lib/queryClient';
+import type { PageWithSections, Page, PageSection, ContentElement, SiteSetting } from '@shared/schema';
 
 const ADMIN_TOKEN = 'admin-token';
 
@@ -18,7 +17,19 @@ export default function Admin() {
   const [selectedPage, setSelectedPage] = useState<string>('');
   const [editingElement, setEditingElement] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string>('');
+  const [editingSetting, setEditingSetting] = useState<string | null>(null);
+  const [editSettingValue, setEditSettingValue] = useState<string>('');
   const queryClient = useQueryClient();
+
+  // Fetch site settings
+  const { data: siteSettings, isLoading: settingsLoading } = useQuery({
+    queryKey: ['/api/settings'],
+    queryFn: async (): Promise<SiteSetting[]> => {
+      const response = await fetch('/api/settings');
+      if (!response.ok) throw new Error('Failed to fetch settings');
+      return response.json();
+    }
+  });
 
   // Fetch all pages
   const { data: pages, isLoading: pagesLoading } = useQuery({
@@ -78,6 +89,28 @@ export default function Admin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/pages'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/settings'] });
+    }
+  });
+
+  // Update setting mutation
+  const updateSettingMutation = useMutation({
+    mutationFn: async ({ key, value }: { key: string, value: string }) => {
+      const response = await fetch(`/api/admin/settings/${key}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${ADMIN_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ value })
+      });
+      if (!response.ok) throw new Error('Failed to update setting');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/settings'] });
+      setEditingSetting(null);
+      setEditSettingValue('');
     }
   });
 
@@ -95,6 +128,22 @@ export default function Admin() {
   const handleCancel = () => {
     setEditingElement(null);
     setEditContent('');
+  };
+
+  const handleEditSetting = (key: string, value: string) => {
+    setEditingSetting(key);
+    setEditSettingValue(value);
+  };
+
+  const handleSaveSetting = () => {
+    if (editingSetting && editSettingValue !== undefined) {
+      updateSettingMutation.mutate({ key: editingSetting, value: editSettingValue });
+    }
+  };
+
+  const handleCancelSetting = () => {
+    setEditingSetting(null);
+    setEditSettingValue('');
   };
 
   const runMigration = () => {
@@ -157,9 +206,10 @@ export default function Admin() {
       </div>
 
       <Tabs defaultValue="pages" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="pages" data-testid="tab-pages">Pages</TabsTrigger>
           <TabsTrigger value="content" data-testid="tab-content">Edit Content</TabsTrigger>
+          <TabsTrigger value="settings" data-testid="tab-settings">Site Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pages" className="space-y-6">
@@ -311,6 +361,87 @@ export default function Admin() {
               </div>
             ) : (
               <p className="text-muted-foreground">Failed to load page content.</p>
+            )}
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          <Card className="p-6">
+            <h2 className="text-2xl font-semibold mb-4 text-foreground">Site Settings</h2>
+            
+            {settingsLoading ? (
+              <div className="animate-pulse space-y-4">
+                <div className="h-6 bg-muted rounded w-1/3"></div>
+                <div className="h-4 bg-muted rounded w-full"></div>
+                <div className="h-4 bg-muted rounded w-3/4"></div>
+              </div>
+            ) : siteSettings && siteSettings.length > 0 ? (
+              <div className="space-y-4">
+                {siteSettings.map((setting) => (
+                  <div
+                    key={setting.key}
+                    className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-medium text-foreground mb-1">
+                          {setting.key.replace(/^social_|_url$/g, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </h3>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {setting.description}
+                        </p>
+                        
+                        {editingSetting === setting.key ? (
+                          <div className="space-y-3">
+                            <Input
+                              value={editSettingValue}
+                              onChange={(e) => setEditSettingValue(e.target.value)}
+                              className="w-full"
+                              placeholder="Enter URL..."
+                              data-testid={`input-setting-${setting.key}`}
+                            />
+                            <div className="flex gap-2">
+                              <Button
+                                onClick={handleSaveSetting}
+                                disabled={updateSettingMutation.isPending}
+                                size="sm"
+                                data-testid={`button-save-setting-${setting.key}`}
+                              >
+                                <Save className="w-4 h-4 mr-2" />
+                                {updateSettingMutation.isPending ? 'Saving...' : 'Save'}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                onClick={handleCancelSetting}
+                                size="sm"
+                                data-testid={`button-cancel-setting-${setting.key}`}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <code className="text-sm bg-muted px-2 py-1 rounded">
+                              {setting.value}
+                            </code>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditSetting(setting.key, setting.value)}
+                              data-testid={`button-edit-setting-${setting.key}`}
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground">No settings found. Run the migration to create default settings.</p>
             )}
           </Card>
         </TabsContent>
