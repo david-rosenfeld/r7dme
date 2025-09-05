@@ -58,7 +58,7 @@ export function Sidebar({ className }: SidebarProps) {
         }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
       >
-        <div className="p-8">
+        <div className="p-8 pl-12">
           {/* Logo/Name */}
           <h1 className="text-3xl font-bold mb-2">
             <button
@@ -74,7 +74,7 @@ export function Sidebar({ className }: SidebarProps) {
           </p>
 
           {/* Navigation */}
-          <nav className="space-y-6" data-testid="nav-main">
+          <nav className="space-y-6 relative overflow-visible" data-testid="nav-main">
             {navItems.map((item) => (
               <motion.button
                 key={item.href}
