@@ -84,49 +84,50 @@
     border-radius: 50%;
     transform: translate(-50%, -50%);
   }
+}
 
-  .nav-link {
-    @apply transition-all duration-200 ease-in-out relative;
-    padding-left: 0;
-  }
+/* Navigation link styles - outside layer for higher specificity */
+.nav-link {
+  position: relative !important;
+  transition: all 0.2s ease-in-out !important;
+}
 
-  .nav-link::before {
-    content: '';
-    position: absolute;
-    left: -28px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 16px;
-    height: 2px;
-    background-color: hsl(var(--primary));
-    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    z-index: 1;
-  }
+.nav-link::before {
+  content: '' !important;
+  position: absolute !important;
+  left: -24px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 16px !important;
+  height: 2px !important;
+  background-color: #64ffda !important;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  z-index: 10 !important;
+}
 
-  .nav-link.active::before {
-    width: 80px;
-    background-color: hsl(var(--primary));
-  }
+.nav-link.active::before {
+  width: 64px !important;
+  background-color: #64ffda !important;
+}
 
-  .nav-link:hover::before {
-    width: 60px;
-    background-color: hsl(var(--primary));
-  }
+.nav-link:hover::before {
+  width: 48px !important;
+  background-color: #64ffda !important;
+}
 
-  .experience-item {
-    border-left: 1px solid hsl(var(--border));
-    padding-left: 24px;
-    position: relative;
-  }
+.experience-item {
+  border-left: 1px solid hsl(var(--border));
+  padding-left: 24px;
+  position: relative;
+}
 
-  .experience-item::before {
-    content: '';
-    position: absolute;
-    left: -5px;
-    top: 8px;
-    width: 9px;
-    height: 9px;
-    background-color: hsl(var(--primary));
-    border-radius: 50%;
-  }
+.experience-item::before {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: 8px;
+  width: 9px;
+  height: 9px;
+  background-color: hsl(var(--primary));
+  border-radius: 50%;
 }
