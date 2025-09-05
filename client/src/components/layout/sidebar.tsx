@@ -83,7 +83,8 @@ export function Sidebar({ className }: SidebarProps) {
                   "nav-link block text-lg font-medium hover:text-primary transition-colors w-full text-left",
                   location === item.href && "active text-primary"
                 )}
-                whileHover={{ x: 8 }}
+                whileHover={{ x: 32 }}
+                animate={{ x: location === item.href ? 32 : 0 }}
                 transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
                 data-testid={`link-${item.label.toLowerCase()}`}
               >
