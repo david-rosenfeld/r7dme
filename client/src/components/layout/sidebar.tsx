@@ -92,7 +92,7 @@ export function Sidebar({ className }: SidebarProps) {
                 </motion.button>
                 <div 
                   className={cn(
-                    "nav-line absolute left-[-24px] top-1/2 h-0.5 bg-primary transition-all duration-300 ease-out transform -translate-y-1/2",
+                    "nav-line absolute left-[-24px] top-1/2 h-0.5 transition-all duration-300 ease-out transform -translate-y-1/2",
                     location === item.href ? "w-12" : "w-4"
                   )}
                   style={{
