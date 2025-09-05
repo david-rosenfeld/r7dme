@@ -92,7 +92,7 @@
 }
 
 .nav-line {
-  background-color: hsl(var(--primary)) !important;
+  background-color: var(--primary) !important;
 }
 
 .experience-item {
