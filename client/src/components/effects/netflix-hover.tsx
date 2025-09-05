@@ -120,9 +120,12 @@ export function NetflixHoverItem({
         opacity: getOpacity(),
         zIndex: getZIndex(),
       }}
+      transition={{
+        opacity: { duration: 0.3, ease: "easeOut" },
+        zIndex: { duration: 0 },
+      }}
       style={{
         transform: getTransform(),
-        transition: 'all 0.4s cubic-bezier(0.6, -0.05, 0.01, 0.99)',
         willChange: 'transform, opacity, z-index',
       }}
       data-testid={`netflix-hover-item-${index}`}
