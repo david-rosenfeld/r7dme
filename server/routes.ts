@@ -1,6 +1,15 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { migrateContent } from "./migrate-content";
+import {
+  insertPageSchema,
+  insertPageSectionSchema,
+  insertContentElementSchema,
+  updatePageSchema,
+  updatePageSectionSchema,
+  updateContentElementSchema
+} from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for deployment verification
@@ -12,11 +21,174 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
-  // put application routes here
-  // prefix all routes with /api
+  // Public API routes - no authentication required
+  
+  // Get all pages
+  app.get("/api/pages", async (_req, res) => {
+    try {
+      const pages = await storage.getAllPages();
+      res.json(pages);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch pages" });
+    }
+  });
 
-  // use storage to perform CRUD operations on the storage interface
-  // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
+  // Get page by slug with full content
+  app.get("/api/pages/:slug", async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const page = await storage.getPageBySlug(slug);
+      if (!page) {
+        return res.status(404).json({ error: "Page not found" });
+      }
+      res.json(page);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch page" });
+    }
+  });
+
+  // Admin API routes - basic auth middleware
+  const requireAuth = (req: any, res: any, next: any) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || authHeader !== 'Bearer admin-token') {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    next();
+  };
+
+  // Migration endpoint for initializing content
+  app.post("/api/admin/migrate", requireAuth, async (_req, res) => {
+    try {
+      await migrateContent();
+      res.json({ message: "Content migration completed successfully" });
+    } catch (error: any) {
+      console.error("Migration error:", error);
+      res.status(500).json({ error: "Migration failed", details: error.message });
+    }
+  });
+
+  // Page management endpoints
+  app.post("/api/admin/pages", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertPageSchema.parse(req.body);
+      const page = await storage.createPage(validatedData);
+      res.status(201).json(page);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create page" });
+    }
+  });
+
+  app.put("/api/admin/pages/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = updatePageSchema.parse(req.body);
+      const page = await storage.updatePage(id, validatedData);
+      res.json(page);
+    } catch (error: any) {
+      if (error.message === 'Page not found') {
+        return res.status(404).json({ error: "Page not found" });
+      }
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update page" });
+    }
+  });
+
+  app.delete("/api/admin/pages/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deletePage(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete page" });
+    }
+  });
+
+  // Section management endpoints
+  app.post("/api/admin/sections", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertPageSectionSchema.parse(req.body);
+      const section = await storage.createSection(validatedData);
+      res.status(201).json(section);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create section" });
+    }
+  });
+
+  app.put("/api/admin/sections/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = updatePageSectionSchema.parse(req.body);
+      const section = await storage.updateSection(id, validatedData);
+      res.json(section);
+    } catch (error: any) {
+      if (error.message === 'Section not found') {
+        return res.status(404).json({ error: "Section not found" });
+      }
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update section" });
+    }
+  });
+
+  app.delete("/api/admin/sections/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteSection(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete section" });
+    }
+  });
+
+  // Content element management endpoints
+  app.post("/api/admin/elements", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertContentElementSchema.parse(req.body);
+      const element = await storage.createElement(validatedData);
+      res.status(201).json(element);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create element" });
+    }
+  });
+
+  app.put("/api/admin/elements/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = updateContentElementSchema.parse(req.body);
+      const element = await storage.updateElement(id, validatedData);
+      res.json(element);
+    } catch (error: any) {
+      if (error.message === 'Element not found') {
+        return res.status(404).json({ error: "Element not found" });
+      }
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update element" });
+    }
+  });
+
+  app.delete("/api/admin/elements/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteElement(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete element" });
+    }
+  });
 
   const httpServer = createServer(app);
 
