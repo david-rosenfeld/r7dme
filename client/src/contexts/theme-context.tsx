@@ -28,6 +28,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty('--sidebar-accent-foreground', 'hsl(196, 75%, 65%)');
       root.style.setProperty('--sidebar-ring', 'hsl(196, 75%, 65%)');
       root.style.setProperty('--chart-1', 'hsl(196, 75%, 65%)');
+      // Title text colors for cyan theme
+      root.style.setProperty('--foreground', 'hsl(196, 75%, 65%)');
     } else {
       // Green theme colors
       root.style.setProperty('--primary', 'hsl(158, 77%, 57%)'); // #3BEDB7
@@ -37,6 +39,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.style.setProperty('--sidebar-accent-foreground', 'hsl(158, 77%, 57%)');
       root.style.setProperty('--sidebar-ring', 'hsl(158, 77%, 57%)');
       root.style.setProperty('--chart-1', 'hsl(158, 77%, 57%)');
+      // Title text colors for green theme
+      root.style.setProperty('--foreground', 'hsl(158, 77%, 57%)');
     }
   }, [colorTheme]);
 
