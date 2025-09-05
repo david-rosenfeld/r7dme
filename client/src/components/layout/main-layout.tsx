@@ -13,7 +13,7 @@ export function MainLayout({ children }: MainLayoutProps) {
       <Sidebar />
       
       {/* Main Content Area */}
-      <div className="flex-1 lg:ml-80">
+      <div className="flex-1 lg:ml-40">
         <motion.main
           className="p-8 lg:p-16 max-w-4xl"
           initial={{ opacity: 0, y: 20 }}
