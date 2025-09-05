@@ -84,3 +84,12 @@ Preferred communication style: Simple, everyday language.
 - **Zod**: TypeScript-first schema validation
 - **@hookform/resolvers**: React Hook Form validation resolvers
 - **drizzle-zod**: Integration between Drizzle ORM and Zod
+
+# Recent Changes
+
+- Extended CMS with site settings functionality for managing social media URLs
+- Created siteSettings database table and corresponding API endpoints
+- Updated sidebar component to fetch social media URLs dynamically from CMS instead of hardcoded values
+- Added Site Settings tab to admin interface for editing GitHub, LinkedIn, and X URLs
+- Reduced empty space between sidebar and main content by 50% while maintaining sidebar original width
+- Working on "hover" branch to implement Netflix-style hover effects for portfolio sections
