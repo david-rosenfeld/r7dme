@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { migrateContent } from "./migrate-content";
+import { storage } from "./storage";
 
 const app = express();
 app.use(express.json());
@@ -36,8 +38,27 @@ app.use((req, res, next) => {
   next();
 });
 
+// Auto-migrate content on startup if CMS is empty
+async function initializeContent() {
+  try {
+    const pages = await storage.getAllPages();
+    if (pages.length === 0) {
+      log("No content found, running automatic migration...");
+      await migrateContent();
+      log("Automatic content migration completed!");
+    } else {
+      log(`Found ${pages.length} pages in CMS, skipping migration`);
+    }
+  } catch (error) {
+    console.error("Failed to initialize content:", error);
+  }
+}
+
 (async () => {
   const server = await registerRoutes(app);
+
+  // Initialize content before setting up routes and middleware
+  await initializeContent();
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
