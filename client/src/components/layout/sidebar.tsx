@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { ColorToggle } from '@/components/ui/color-toggle';
+import { HoverEffectsToggle } from '@/components/ui/hover-effects-toggle';
 import type { SiteSetting } from '@shared/schema';
 
 interface SidebarProps {
@@ -160,7 +161,10 @@ export function Sidebar({ className }: SidebarProps) {
               <SiX className="w-6 h-6" />
             </motion.a>
             </div>
-            <ColorToggle />
+            <div className="flex flex-col gap-2">
+              <ColorToggle />
+              <HoverEffectsToggle />
+            </div>
           </div>
         </div>
       </motion.div>

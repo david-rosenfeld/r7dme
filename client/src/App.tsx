@@ -11,6 +11,7 @@ import Research from "@/pages/research";
 import Admin from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 import { ThemeProvider } from "@/contexts/theme-context";
+import { HoverEffectsProvider } from "@/contexts/hover-effects-context";
 
 function Router() {
   return (
@@ -32,8 +33,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ThemeProvider>
-          <Toaster />
-          <Router />
+          <HoverEffectsProvider>
+            <Toaster />
+            <Router />
+          </HoverEffectsProvider>
         </ThemeProvider>
       </TooltipProvider>
     </QueryClientProvider>
