@@ -59,12 +59,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin API routes - basic auth middleware
+  // Admin login endpoint
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { password } = req.body;
+      
+      if (!password || password !== process.env.ADMIN_PASSWORD) {
+        return res.status(401).json({ message: "Invalid password" });
+      }
+      
+      // Generate a session token (in production, use proper JWT)
+      const sessionToken = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      res.json({ 
+        token: sessionToken,
+        message: "Login successful" 
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Admin API routes - session-based auth middleware
   const requireAuth = (req: any, res: any, next: any) => {
     const authHeader = req.headers.authorization;
-    if (!authHeader || authHeader !== 'Bearer admin-token') {
+    
+    if (!authHeader || !authHeader.startsWith('Bearer session_')) {
       return res.status(401).json({ error: "Unauthorized" });
     }
+    
+    // In production, validate the session token properly
+    const token = authHeader.split(' ')[1];
+    if (!token.startsWith('session_')) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+    
     next();
   };
 

@@ -8,18 +8,72 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { RefreshCw, Save, Plus, Trash2, Edit3 } from 'lucide-react';
+import { RefreshCw, Save, Plus, Trash2, Edit3, LogOut } from 'lucide-react';
 import type { PageWithSections, Page, PageSection, ContentElement, SiteSetting } from '@shared/schema';
-
-const ADMIN_TOKEN = 'admin-token';
+import { AdminLogin } from '@/components/auth/admin-login';
 
 export default function Admin() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [authToken, setAuthToken] = useState<string>('');
+  const [loginError, setLoginError] = useState<string>('');
+  const [isLoggingIn, setIsLoggingIn] = useState<boolean>(false);
   const [selectedPage, setSelectedPage] = useState<string>('');
   const [editingElement, setEditingElement] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string>('');
   const [editingSetting, setEditingSetting] = useState<string | null>(null);
   const [editSettingValue, setEditSettingValue] = useState<string>('');
   const queryClient = useQueryClient();
+
+  // Handle admin login
+  const handleLogin = async (password: string) => {
+    setIsLoggingIn(true);
+    setLoginError('');
+    
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAuthToken(data.token);
+        setIsAuthenticated(true);
+      } else {
+        const error = await response.json();
+        setLoginError(error.message || 'Invalid password');
+      }
+    } catch (error) {
+      setLoginError('Login failed. Please try again.');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setAuthToken('');
+    setSelectedPage('');
+    setEditingElement(null);
+    setEditContent('');
+    setEditingSetting(null);
+    setEditSettingValue('');
+  };
+
+  // If not authenticated, show login form
+  if (!isAuthenticated) {
+    return (
+      <AdminLogin 
+        onLogin={handleLogin}
+        isLoading={isLoggingIn}
+        error={loginError}
+      />
+    );
+  }
 
   // Fetch site settings
   const { data: siteSettings, isLoading: settingsLoading } = useQuery({
@@ -59,7 +113,7 @@ export default function Admin() {
       const response = await fetch(`/api/admin/elements/${elementId}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${ADMIN_TOKEN}`,
+          'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ content })
@@ -80,7 +134,7 @@ export default function Admin() {
       const response = await fetch('/api/admin/migrate', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${ADMIN_TOKEN}`,
+          'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json'
         }
       });
@@ -99,7 +153,7 @@ export default function Admin() {
       const response = await fetch(`/api/admin/settings/${key}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${ADMIN_TOKEN}`,
+          'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ value })
@@ -173,9 +227,20 @@ export default function Admin() {
       className="p-8 max-w-7xl mx-auto"
     >
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-foreground mb-4" data-testid="text-admin-title">
-          Content Management System
-        </h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-4xl font-bold text-foreground" data-testid="text-admin-title">
+            Content Management System
+          </h1>
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className="flex items-center gap-2"
+            data-testid="button-logout"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </Button>
+        </div>
         <p className="text-muted-foreground mb-6">
           Manage your website content dynamically through this interface.
         </p>
@@ -350,7 +415,7 @@ export default function Admin() {
                           {element.metadata && (
                             <div className="mt-2 p-2 bg-muted/20 rounded text-xs">
                               <strong>Metadata:</strong> 
-                              <pre className="mt-1">{JSON.stringify(element.metadata, null, 2)}</pre>
+                              <pre className="mt-1">{JSON.stringify(element.metadata as Record<string, any>, null, 2)}</pre>
                             </div>
                           )}
                         </div>
