@@ -450,7 +450,7 @@ export default function Admin() {
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex-1">
                         <h3 className="text-lg font-medium text-foreground mb-1">
-                          {setting.key.replace(/^social_|_url$/g, '').replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          {setting.key.replace(/^social_|_url$/g, '').replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                         </h3>
                         <p className="text-sm text-muted-foreground mb-3">
                           {setting.description}
