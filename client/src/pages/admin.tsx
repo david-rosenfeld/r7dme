@@ -419,12 +419,6 @@ export default function Admin() {
                             </p>
                           )}
 
-                          {element.metadata && (
-                            <div className="mt-2 p-2 bg-muted/20 rounded text-xs">
-                              <strong>Metadata:</strong> 
-                              <pre className="mt-1">{String(JSON.stringify(element.metadata, null, 2))}</pre>
-                            </div>
-                          )}
                         </div>
                       ))}
                     </div>
