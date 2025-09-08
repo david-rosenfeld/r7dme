@@ -107,12 +107,6 @@ export default function Admin() {
     enabled: !!selectedPage
   });
 
-  // Add debugging
-  console.log('Admin component rendering, authenticated:', isAuthenticated);
-  console.log('Pages loading:', pagesLoading);
-  console.log('Settings loading:', settingsLoading);
-  console.log('Pages data:', pages);
-  console.log('Settings data:', siteSettings);
 
   // Update element mutation
   const updateElementMutation = useMutation({
@@ -422,7 +416,7 @@ export default function Admin() {
                           {element.metadata && (
                             <div className="mt-2 p-2 bg-muted/20 rounded text-xs">
                               <strong>Metadata:</strong> 
-                              <pre className="mt-1">{JSON.stringify(element.metadata, null, 2)}</pre>
+                              <pre className="mt-1">{String(JSON.stringify(element.metadata, null, 2))}</pre>
                             </div>
                           )}
                         </div>
