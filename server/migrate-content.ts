@@ -257,6 +257,154 @@ export async function migrateContent() {
       });
     }
 
+    // Create Research page
+    const researchPage = await storage.createPage({
+      slug: "research",
+      title: "Research",
+      metaDescription: "Research interests, publications, and ongoing projects in platform engineering and technology"
+    });
+
+    // Research hero section
+    const researchHeroSection = await storage.createSection({
+      pageId: researchPage.id,
+      type: "hero",
+      title: "Research",
+      order: 0
+    });
+
+    // Research interests section
+    const researchInterestsSection = await storage.createSection({
+      pageId: researchPage.id,
+      type: "research_interests",
+      title: "Current Research Interests",
+      order: 1
+    });
+
+    // Research interests
+    const researchInterests = [
+      {
+        title: 'Platform Engineering',
+        description: 'Exploring infrastructure automation, developer experience optimization, and scalable system architectures for modern software development workflows.',
+      },
+      {
+        title: 'Cloud Native Technologies',
+        description: 'Research in containerization, microservices architectures, and distributed systems for improved scalability and reliability.',
+      },
+      {
+        title: 'Developer Tooling',
+        description: 'Investigating tools and processes that enhance developer productivity, code quality, and collaborative software development.',
+      },
+      {
+        title: 'System Performance',
+        description: 'Analysis of system optimization techniques, performance monitoring, and capacity planning for large-scale applications.',
+      },
+    ];
+
+    for (let i = 0; i < researchInterests.length; i++) {
+      const interest = researchInterests[i];
+      await storage.createElement({
+        sectionId: researchInterestsSection.id,
+        type: "research_interest",
+        title: interest.title,
+        content: interest.description,
+        order: i
+      });
+    }
+
+    // Publications section
+    const publicationsSection = await storage.createSection({
+      pageId: researchPage.id,
+      type: "publications",
+      title: "Recent Publications",
+      order: 2
+    });
+
+    // Publications
+    const publications = [
+      {
+        title: 'Platform Engineering Best Practices: A Modern Approach to Developer Experience',
+        authors: 'David Rosenfeld, et al. (2024)',
+        venue: 'Journal of Software Engineering Practices',
+        links: {
+          paper: '#',
+          cite: '#',
+        },
+      },
+      {
+        title: 'Scalable Infrastructure Patterns: Lessons from Cloud Native Implementations',
+        authors: 'D. Rosenfeld, Engineering Team (2023)',
+        venue: 'International Conference on Cloud Computing',
+        links: {
+          paper: '#',
+          cite: '#',
+        },
+      },
+      {
+        title: 'Developer Productivity Metrics: Measuring Impact in Modern Development Workflows',
+        authors: 'Rosenfeld, D., Research Collaborators (2023)',
+        venue: 'Software Development Research Symposium',
+        links: {
+          paper: '#',
+          cite: '#',
+        },
+      },
+    ];
+
+    for (let i = 0; i < publications.length; i++) {
+      const publication = publications[i];
+      await storage.createElement({
+        sectionId: publicationsSection.id,
+        type: "publication",
+        title: publication.title,
+        content: `${publication.authors} - Published in ${publication.venue}`,
+        metadata: {
+          authors: publication.authors,
+          venue: publication.venue,
+          links: publication.links
+        },
+        order: i
+      });
+    }
+
+    // Ongoing projects section
+    const ongoingProjectsSection = await storage.createSection({
+      pageId: researchPage.id,
+      type: "ongoing_projects",
+      title: "Ongoing Research Projects",
+      order: 3
+    });
+
+    // Ongoing projects
+    const ongoingProjects = [
+      {
+        title: 'Infrastructure Automation Framework',
+        description: 'Developing a comprehensive framework for automated infrastructure provisioning and management across multi-cloud environments with focus on developer experience.',
+        status: 'Ongoing',
+        tags: ['DevOps', 'Infrastructure', 'Automation', 'Cloud'],
+      },
+      {
+        title: 'Developer Experience Metrics',
+        description: 'Research into quantifiable metrics for measuring and improving developer experience, productivity, and satisfaction in modern software development teams.',
+        status: 'In Review',
+        tags: ['Developer Experience', 'Metrics', 'Productivity', 'Research'],
+      },
+    ];
+
+    for (let i = 0; i < ongoingProjects.length; i++) {
+      const project = ongoingProjects[i];
+      await storage.createElement({
+        sectionId: ongoingProjectsSection.id,
+        type: "research_project",
+        title: project.title,
+        content: project.description,
+        metadata: {
+          status: project.status,
+          tags: project.tags
+        },
+        order: i
+      });
+    }
+
     // Create default site settings for social media links
     await storage.createSetting({
       key: 'social_github_url',
