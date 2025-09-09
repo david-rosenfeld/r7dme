@@ -158,65 +158,28 @@ export default function Admin() {
 
   if (!isAuthenticated) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        padding: '20px'
-      }}>
-        <div style={{
-          background: 'white',
-          padding: '40px',
-          borderRadius: '8px',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-          width: '100%',
-          maxWidth: '400px'
-        }}>
-          <h1 style={{ 
-            fontSize: '24px', 
-            fontWeight: 'bold', 
-            marginBottom: '20px',
-            textAlign: 'center',
-            color: '#333'
-          }}>
+      <div className="flex justify-center items-center min-h-screen p-5">
+        <div className="bg-white p-10 rounded-lg shadow-md w-full max-w-sm">
+          <h1 className="text-2xl font-bold mb-5 text-center text-gray-800">
             Admin Login
           </h1>
           
           <form onSubmit={handleLogin}>
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ 
-                display: 'block', 
-                marginBottom: '5px',
-                fontWeight: '500',
-                color: '#555'
-              }}>
+            <div className="mb-5">
+              <label className="block mb-1 font-medium text-gray-600">
                 Password
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px',
-                  border: '1px solid #ddd',
-                  borderRadius: '4px',
-                  fontSize: '16px'
-                }}
+                className="w-full p-2.5 border border-gray-300 rounded text-base"
                 required
               />
             </div>
             
             {error && (
-              <div style={{
-                background: '#fee',
-                color: '#c33',
-                padding: '10px',
-                borderRadius: '4px',
-                marginBottom: '20px',
-                fontSize: '14px'
-              }}>
+              <div className="bg-red-50 text-red-600 p-2.5 rounded mb-5 text-sm">
                 {error}
               </div>
             )}
@@ -224,17 +187,11 @@ export default function Admin() {
             <button
               type="submit"
               disabled={isLoading}
-              style={{
-                width: '100%',
-                padding: '12px',
-                background: isLoading ? '#ccc' : '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                fontSize: '16px',
-                fontWeight: '500',
-                cursor: isLoading ? 'not-allowed' : 'pointer'
-              }}
+              className={`w-full py-3 text-white border-none rounded text-base font-medium cursor-pointer ${
+                isLoading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
             >
               {isLoading ? 'Logging in...' : 'Login'}
             </button>
@@ -245,63 +202,36 @@ export default function Admin() {
   }
 
   return (
-    <div style={{
-      padding: '20px',
-      maxWidth: '1200px',
-      margin: '0 auto'
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '20px'
-      }}>
+    <div className="p-5 max-w-6xl mx-auto">
+      <div className="flex justify-between items-center mb-5">
         <div>
-          <h1 style={{
-            fontSize: '32px',
-            fontWeight: 'bold',
-            color: '#333'
-          }}>
+          <h1 className="text-3xl font-bold text-gray-800">
             Content Management System
           </h1>
           {/* Step 1 Test: Single shadcn/ui component */}
-          <div style={{ marginTop: '10px' }}>
+          <div className="mt-2.5">
             <Button 
               variant="outline" 
               size="sm"
-              style={{ marginRight: '10px' }}
+              className="mr-2.5"
             >
               TEST: shadcn/ui Button
             </Button>
-            <span style={{ fontSize: '12px', color: '#666' }}>
+            <span className="text-xs text-gray-500">
               ↑ Testing component library compatibility
             </span>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div className="flex gap-2.5">
           <button
             onClick={runMigration}
-            style={{
-              padding: '8px 16px',
-              background: '#28a745',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
+            className="px-4 py-2 bg-green-600 text-white border-none rounded cursor-pointer hover:bg-green-700"
           >
             Run Migration
           </button>
           <button
             onClick={handleLogout}
-            style={{
-              padding: '8px 16px',
-              background: '#6c757d',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
+            className="px-4 py-2 bg-gray-600 text-white border-none rounded cursor-pointer hover:bg-gray-700"
           >
             Logout
           </button>
@@ -309,25 +239,17 @@ export default function Admin() {
       </div>
       
       {/* Tab Navigation */}
-      <div style={{
-        borderBottom: '1px solid #dee2e6',
-        marginBottom: '20px'
-      }}>
-        <div style={{ display: 'flex', gap: '0' }}>
+      <div className="border-b border-gray-300 mb-5">
+        <div className="flex">
           {['pages', 'content', 'settings'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              style={{
-                padding: '12px 24px',
-                background: activeTab === tab ? '#007bff' : 'transparent',
-                color: activeTab === tab ? 'white' : '#333',
-                border: 'none',
-                borderBottom: activeTab === tab ? 'none' : '1px solid #dee2e6',
-                cursor: 'pointer',
-                fontSize: '16px',
-                textTransform: 'capitalize'
-              }}
+              className={`py-3 px-6 border-none cursor-pointer text-base capitalize ${
+                activeTab === tab 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-transparent text-gray-800 border-b border-gray-300 hover:bg-gray-50'
+              }`}
             >
               {tab === 'content' ? 'Edit Content' : tab}
             </button>
@@ -337,56 +259,35 @@ export default function Admin() {
 
       {/* Pages Tab */}
       {activeTab === 'pages' && (
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '8px',
-          border: '1px solid #dee2e6'
-        }}>
-          <h2 style={{
-            fontSize: '24px',
-            marginBottom: '20px',
-            color: '#333'
-          }}>
+        <div className="bg-white p-5 rounded-lg border border-gray-300">
+          <h2 className="text-2xl mb-5 text-gray-800">
             Available Pages
           </h2>
           
           {pages.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div className="flex flex-col gap-4">
               {pages.map((page) => (
                 <div
                   key={page.id}
-                  style={{
-                    background: '#f8f9fa',
-                    padding: '15px',
-                    borderRadius: '6px',
-                    border: '1px solid #e9ecef',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}
+                  className="bg-gray-50 p-4 rounded border border-gray-200 flex justify-between items-center"
                 >
                   <div>
-                    <h3 style={{ margin: '0 0 5px 0', fontSize: '18px', color: '#333' }}>
+                    <h3 className="m-0 mb-1 text-lg text-gray-800">
                       {page.title}
                     </h3>
-                    <p style={{ margin: '0 0 5px 0', color: '#666', fontSize: '14px' }}>
+                    <p className="m-0 mb-1 text-gray-600 text-sm">
                       /{page.slug}
                     </p>
                     {page.metaDescription && (
-                      <p style={{ margin: '0', color: '#888', fontSize: '13px' }}>
+                      <p className="m-0 text-gray-500 text-xs">
                         {page.metaDescription}
                       </p>
                     )}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{
-                      padding: '4px 8px',
-                      borderRadius: '4px',
-                      fontSize: '12px',
-                      background: page.isPublished ? '#d4edda' : '#f8d7da',
-                      color: page.isPublished ? '#155724' : '#721c24'
-                    }}>
+                  <div className="flex items-center gap-2.5">
+                    <span className={`px-2 py-1 rounded text-xs ${
+                      page.isPublished ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
                       {page.isPublished ? 'Published' : 'Draft'}
                     </span>
                     <button
@@ -395,15 +296,7 @@ export default function Admin() {
                         setActiveTab('content');
                         loadPageContent(page.slug);
                       }}
-                      style={{
-                        padding: '6px 12px',
-                        background: '#007bff',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '14px'
-                      }}
+                      className="px-3 py-1.5 bg-blue-600 text-white border-none rounded cursor-pointer text-sm hover:bg-blue-700"
                     >
                       Edit Content
                     </button>
@@ -412,7 +305,7 @@ export default function Admin() {
               ))}
             </div>
           ) : (
-            <p style={{ color: '#666' }}>
+            <p className="text-gray-600">
               No pages found. Run the migration to create default pages.
             </p>
           )}
@@ -421,22 +314,13 @@ export default function Admin() {
 
       {/* Content Tab */}
       {activeTab === 'content' && (
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '8px',
-          border: '1px solid #dee2e6'
-        }}>
-          <h2 style={{
-            fontSize: '24px',
-            marginBottom: '20px',
-            color: '#333'
-          }}>
+        <div className="bg-white p-5 rounded-lg border border-gray-300">
+          <h2 className="text-2xl mb-5 text-gray-800">
             Edit Page Content
           </h2>
           
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: '500' }}>
+          <div className="mb-5">
+            <label className="block mb-1 font-medium">
               Select Page:
             </label>
             <select
@@ -447,13 +331,7 @@ export default function Admin() {
                   loadPageContent(e.target.value);
                 }
               }}
-              style={{
-                padding: '8px',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '16px',
-                minWidth: '200px'
-              }}
+              className="p-2 border border-gray-300 rounded text-base min-w-48"
             >
               <option value="">Select a page to edit</option>
               {pages.map((page) => (
@@ -465,50 +343,29 @@ export default function Admin() {
           </div>
 
           {pageContent && pageContent.sections ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="flex flex-col gap-5">
               {pageContent.sections.map((section: any) => (
                 <div
                   key={section.id}
-                  style={{
-                    background: '#f8f9fa',
-                    padding: '20px',
-                    borderRadius: '6px',
-                    border: '1px solid #e9ecef'
-                  }}
+                  className="bg-gray-50 p-5 rounded border border-gray-200"
                 >
-                  <h3 style={{ margin: '0 0 15px 0', fontSize: '20px', color: '#333' }}>
+                  <h3 className="m-0 mb-4 text-xl text-gray-800">
                     {section.title || `${section.type} Section`}
                   </h3>
                   
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  <div className="flex flex-col gap-4">
                     {section.elements.map((element: any) => (
                       <div
                         key={element.id}
-                        style={{
-                          background: 'white',
-                          padding: '15px',
-                          borderRadius: '4px',
-                          border: '1px solid #dee2e6'
-                        }}
+                        className="bg-white p-4 rounded border border-gray-300"
                       >
-                        <div style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'flex-start',
-                          marginBottom: '10px'
-                        }}>
+                        <div className="flex justify-between items-start mb-2.5">
                           <div>
-                            <span style={{
-                              padding: '2px 6px',
-                              background: '#e9ecef',
-                              borderRadius: '3px',
-                              fontSize: '12px',
-                              marginRight: '8px'
-                            }}>
+                            <span className="px-1.5 py-0.5 bg-gray-200 rounded text-xs mr-2">
                               {element.type}
                             </span>
                             {element.title && (
-                              <span style={{ fontSize: '14px', fontWeight: '500' }}>
+                              <span className="text-sm font-medium">
                                 {element.title}
                               </span>
                             )}
@@ -518,15 +375,7 @@ export default function Admin() {
                               setEditingElement(element.id);
                               setEditContent(element.content || '');
                             }}
-                            style={{
-                              padding: '4px 8px',
-                              background: '#6c757d',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: '3px',
-                              cursor: 'pointer',
-                              fontSize: '12px'
-                            }}
+                            className="px-2 py-1 bg-gray-600 text-white border-none rounded cursor-pointer text-xs hover:bg-gray-700"
                           >
                             Edit
                           </button>
@@ -537,28 +386,12 @@ export default function Admin() {
                             <textarea
                               value={editContent}
                               onChange={(e) => setEditContent(e.target.value)}
-                              style={{
-                                width: '100%',
-                                minHeight: '100px',
-                                padding: '8px',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px',
-                                fontSize: '14px',
-                                marginBottom: '10px'
-                              }}
+                              className="w-full min-h-24 p-2 border border-gray-300 rounded text-sm mb-2.5"
                             />
-                            <div style={{ display: 'flex', gap: '8px' }}>
+                            <div className="flex gap-2">
                               <button
                                 onClick={() => updateElement(element.id, editContent)}
-                                style={{
-                                  padding: '6px 12px',
-                                  background: '#28a745',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  cursor: 'pointer',
-                                  fontSize: '14px'
-                                }}
+                                className="px-3 py-1.5 bg-green-600 text-white border-none rounded cursor-pointer text-sm hover:bg-green-700"
                               >
                                 Save
                               </button>
@@ -567,27 +400,14 @@ export default function Admin() {
                                   setEditingElement(null);
                                   setEditContent('');
                                 }}
-                                style={{
-                                  padding: '6px 12px',
-                                  background: '#6c757d',
-                                  color: 'white',
-                                  border: 'none',
-                                  borderRadius: '4px',
-                                  cursor: 'pointer',
-                                  fontSize: '14px'
-                                }}
+                                className="px-3 py-1.5 bg-gray-600 text-white border-none rounded cursor-pointer text-sm hover:bg-gray-700"
                               >
                                 Cancel
                               </button>
                             </div>
                           </div>
                         ) : (
-                          <p style={{
-                            margin: '0',
-                            fontSize: '14px',
-                            color: '#555',
-                            whiteSpace: 'pre-wrap'
-                          }}>
+                          <p className="m-0 text-sm text-gray-700 whitespace-pre-wrap">
                             {element.content || 'No content'}
                           </p>
                         )}
@@ -598,45 +418,31 @@ export default function Admin() {
               ))}
             </div>
           ) : selectedPage ? (
-            <p style={{ color: '#666' }}>Loading page content...</p>
+            <p className="text-gray-600">Loading page content...</p>
           ) : (
-            <p style={{ color: '#666' }}>Select a page to edit its content.</p>
+            <p className="text-gray-600">Select a page to edit its content.</p>
           )}
         </div>
       )}
 
       {/* Settings Tab */}
       {activeTab === 'settings' && (
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '8px',
-          border: '1px solid #dee2e6'
-        }}>
-          <h2 style={{
-            fontSize: '24px',
-            marginBottom: '20px',
-            color: '#333'
-          }}>
+        <div className="bg-white p-5 rounded-lg border border-gray-300">
+          <h2 className="text-2xl mb-5 text-gray-800">
             Site Settings
           </h2>
           
           {settings.length > 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div className="flex flex-col gap-4">
               {settings.map((setting) => (
                 <div
                   key={setting.key}
-                  style={{
-                    background: '#f8f9fa',
-                    padding: '15px',
-                    borderRadius: '6px',
-                    border: '1px solid #e9ecef'
-                  }}
+                  className="bg-gray-50 p-4 rounded border border-gray-200"
                 >
-                  <h3 style={{ margin: '0 0 5px 0', fontSize: '18px', color: '#333' }}>
+                  <h3 className="m-0 mb-1 text-lg text-gray-800">
                     {setting.key.replace(/^social_|_url$/g, '').replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                   </h3>
-                  <p style={{ margin: '0 0 15px 0', color: '#666', fontSize: '14px' }}>
+                  <p className="m-0 mb-4 text-gray-600 text-sm">
                     {setting.description}
                   </p>
                   
@@ -646,28 +452,13 @@ export default function Admin() {
                         type="text"
                         value={editSettingValue}
                         onChange={(e) => setEditSettingValue(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '8px',
-                          border: '1px solid #ddd',
-                          borderRadius: '4px',
-                          fontSize: '14px',
-                          marginBottom: '10px'
-                        }}
+                        className="w-full p-2 border border-gray-300 rounded text-sm mb-2.5"
                         placeholder="Enter URL..."
                       />
-                      <div style={{ display: 'flex', gap: '8px' }}>
+                      <div className="flex gap-2">
                         <button
                           onClick={() => updateSetting(setting.key, editSettingValue)}
-                          style={{
-                            padding: '6px 12px',
-                            background: '#28a745',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '14px'
-                          }}
+                          className="px-3 py-1.5 bg-green-600 text-white border-none rounded cursor-pointer text-sm hover:bg-green-700"
                         >
                           Save
                         </button>
@@ -676,32 +467,15 @@ export default function Admin() {
                             setEditingSetting(null);
                             setEditSettingValue('');
                           }}
-                          style={{
-                            padding: '6px 12px',
-                            background: '#6c757d',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '14px'
-                          }}
+                          className="px-3 py-1.5 bg-gray-600 text-white border-none rounded cursor-pointer text-sm hover:bg-gray-700"
                         >
                           Cancel
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center'
-                    }}>
-                      <code style={{
-                        background: '#e9ecef',
-                        padding: '4px 8px',
-                        borderRadius: '3px',
-                        fontSize: '13px'
-                      }}>
+                    <div className="flex justify-between items-center">
+                      <code className="bg-gray-200 px-2 py-1 rounded text-xs">
                         {setting.value}
                       </code>
                       <button
@@ -709,15 +483,7 @@ export default function Admin() {
                           setEditingSetting(setting.key);
                           setEditSettingValue(setting.value);
                         }}
-                        style={{
-                          padding: '4px 8px',
-                          background: '#6c757d',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '3px',
-                          cursor: 'pointer',
-                          fontSize: '12px'
-                        }}
+                        className="px-2 py-1 bg-gray-600 text-white border-none rounded cursor-pointer text-xs hover:bg-gray-700"
                       >
                         Edit
                       </button>
@@ -727,7 +493,7 @@ export default function Admin() {
               ))}
             </div>
           ) : (
-            <p style={{ color: '#666' }}>
+            <p className="text-gray-600">
               No settings found. Run the migration to create default settings.
             </p>
           )}
