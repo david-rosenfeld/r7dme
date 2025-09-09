@@ -14,6 +14,7 @@ export default function Admin() {
   const [pageContent, setPageContent] = useState<any>(null);
   const [editingElement, setEditingElement] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string>('');
+  const [editTitle, setEditTitle] = useState<string>('');
   const [editingSetting, setEditingSetting] = useState<string | null>(null);
   const [editSettingValue, setEditSettingValue] = useState<string>('');
 
@@ -81,7 +82,7 @@ export default function Admin() {
     }
   };
 
-  const updateElement = async (elementId: string, content: string) => {
+  const updateElement = async (elementId: string, title: string, content: string) => {
     try {
       const response = await fetch(`/api/admin/elements/${elementId}`, {
         method: 'PUT',
@@ -89,12 +90,13 @@ export default function Admin() {
           'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ title, content })
       });
       
       if (response.ok) {
         setEditingElement(null);
         setEditContent('');
+        setEditTitle('');
         if (selectedPage) {
           loadPageContent(selectedPage);
         }
@@ -374,6 +376,7 @@ export default function Admin() {
                             onClick={() => {
                               setEditingElement(element.id);
                               setEditContent(element.content || '');
+                              setEditTitle(element.title || '');
                             }}
                             className="px-2 py-1 bg-secondary text-secondary-foreground border-none rounded cursor-pointer text-xs hover:bg-secondary/80"
                           >
@@ -383,14 +386,22 @@ export default function Admin() {
 
                         {editingElement === element.id ? (
                           <div>
+                            <input
+                              type="text"
+                              value={editTitle}
+                              onChange={(e) => setEditTitle(e.target.value)}
+                              placeholder="Enter title..."
+                              className="w-full p-2 border border-border rounded text-sm mb-2.5 bg-background text-foreground"
+                            />
                             <textarea
                               value={editContent}
                               onChange={(e) => setEditContent(e.target.value)}
+                              placeholder="Enter content..."
                               className="w-full min-h-24 p-2 border border-border rounded text-sm mb-2.5 bg-background text-foreground"
                             />
                             <div className="flex gap-2">
                               <button
-                                onClick={() => updateElement(element.id, editContent)}
+                                onClick={() => updateElement(element.id, editTitle, editContent)}
                                 className="px-3 py-1.5 bg-green-600 text-white border-none rounded cursor-pointer text-sm hover:bg-green-700"
                               >
                                 Save
@@ -399,6 +410,7 @@ export default function Admin() {
                                 onClick={() => {
                                   setEditingElement(null);
                                   setEditContent('');
+                                  setEditTitle('');
                                 }}
                                 className="px-3 py-1.5 bg-secondary text-secondary-foreground border-none rounded cursor-pointer text-sm hover:bg-secondary/80"
                               >
