@@ -487,17 +487,21 @@ export default function Admin() {
                                 />
                               </>
                             )}
-                            <Label htmlFor={`content-${element.id}`} className="sr-only">
-                              Element Content
-                            </Label>
-                            <Textarea
-                              id={`content-${element.id}`}
-                              value={editContent}
-                              onChange={(e) => setEditContent(e.target.value)}
-                              placeholder="Enter content..."
-                              className="min-h-24 mb-4"
-                              aria-label="Element content"
-                            />
+                            {element.type !== 'publication' && (
+                              <>
+                                <Label htmlFor={`content-${element.id}`} className="sr-only">
+                                  Element Content
+                                </Label>
+                                <Textarea
+                                  id={`content-${element.id}`}
+                                  value={editContent}
+                                  onChange={(e) => setEditContent(e.target.value)}
+                                  placeholder="Enter content..."
+                                  className="min-h-24 mb-4"
+                                  aria-label="Element content"
+                                />
+                              </>
+                            )}
                             <div className="flex gap-4">
                               <Button
                                 onClick={() => updateElement(element.id, editTitle, editContent, editMetadata)}
@@ -565,9 +569,11 @@ export default function Admin() {
                                 )}
                               </div>
                             )}
-                            <p className="m-0 text-sm text-foreground whitespace-pre-wrap">
-                              {element.content || 'No content'}
-                            </p>
+                            {element.type !== 'publication' && (
+                              <p className="m-0 text-sm text-foreground whitespace-pre-wrap">
+                                {element.content || 'No content'}
+                              </p>
+                            )}
                           </div>
                         )}
                       </div>

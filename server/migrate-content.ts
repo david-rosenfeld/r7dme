@@ -350,7 +350,7 @@ export async function migrateContent() {
         sectionId: publicationsSection.id,
         type: "publication",
         title: publication.title,
-        content: `${publication.authors} - Published in ${publication.venue}`,
+        content: null,
         metadata: {
           authors: publication.authors,
           venue: publication.venue,
