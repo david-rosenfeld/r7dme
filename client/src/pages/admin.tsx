@@ -221,7 +221,7 @@ export default function Admin() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">
+          <h1 className="text-4xl font-bold text-foreground">
             Content Management System
           </h1>
           {/* Step 1 Test: Single shadcn/ui component */}
@@ -265,7 +265,7 @@ export default function Admin() {
         <TabsContent value="pages">
           <Card>
             <CardHeader>
-              <CardTitle>Available Pages</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-foreground">Available Pages</CardTitle>
             </CardHeader>
             <CardContent>
               {pages.length > 0 ? (
@@ -276,7 +276,7 @@ export default function Admin() {
                   className="bg-muted p-6 rounded border border-border flex justify-between items-center"
                 >
                   <div>
-                    <h3 className="m-0 mb-1 text-lg text-foreground">
+                    <h3 className="m-0 mb-2 text-xl font-semibold text-foreground">
                       {page.title}
                     </h3>
                     <p className="m-0 mb-1 text-muted-foreground text-sm">
@@ -309,7 +309,7 @@ export default function Admin() {
               ))}
             </div>
           ) : (
-                <p className="text-muted-foreground">
+                <p className="text-lg text-muted-foreground">
                   No pages found. Run the migration to create default pages.
                 </p>
               )}
@@ -320,12 +320,12 @@ export default function Admin() {
         <TabsContent value="content">
           <Card>
             <CardHeader>
-              <CardTitle>Edit Page Content</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-foreground">Edit Page Content</CardTitle>
             </CardHeader>
             <CardContent>
           
           <div className="mb-6">
-            <label className="block mb-2 font-medium">
+            <label className="block mb-2 text-lg font-medium text-foreground">
               Select Page:
             </label>
             <select
@@ -354,7 +354,7 @@ export default function Admin() {
                   key={section.id}
                   className="bg-muted p-6 rounded border border-border"
                 >
-                  <h3 className="m-0 mb-6 text-xl text-foreground">
+                  <h3 className="m-0 mb-6 text-xl font-semibold text-foreground">
                     {section.title || `${section.type} Section`}
                   </h3>
                   
@@ -366,7 +366,7 @@ export default function Admin() {
                       >
                         <div className="flex justify-between items-start mb-4">
                           <div>
-                            <span className="px-1.5 py-0.5 bg-muted rounded text-xs mr-2">
+                            <span className="px-1.5 py-0.5 bg-muted rounded text-sm mr-2">
                               {element.type}
                             </span>
                             {element.title && (
@@ -480,7 +480,7 @@ export default function Admin() {
         <TabsContent value="settings">
           <Card>
             <CardHeader>
-              <CardTitle>Site Settings</CardTitle>
+              <CardTitle className="text-2xl font-semibold text-foreground">Site Settings</CardTitle>
             </CardHeader>
             <CardContent>
           
@@ -491,10 +491,10 @@ export default function Admin() {
                   key={setting.key}
                   className="bg-muted p-6 rounded border border-border"
                 >
-                  <h3 className="m-0 mb-1 text-lg text-foreground">
+                  <h3 className="m-0 mb-2 text-xl font-semibold text-foreground">
                     {setting.key.replace(/^social_|_url$/g, '').replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                   </h3>
-                  <p className="m-0 mb-6 text-muted-foreground text-sm">
+                  <p className="m-0 mb-6 text-lg text-muted-foreground">
                     {setting.description}
                   </p>
                   
@@ -545,7 +545,7 @@ export default function Admin() {
               ))}
             </div>
           ) : (
-              <p className="text-muted-foreground">
+              <p className="text-lg text-muted-foreground">
                 No settings found. Run the migration to create default settings.
               </p>
             )}
