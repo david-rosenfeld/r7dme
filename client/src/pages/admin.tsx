@@ -294,16 +294,17 @@ export default function Admin() {
                     }`}>
                       {page.isPublished ? 'Published' : 'Draft'}
                     </span>
-                    <button
+                    <Button
                       onClick={() => {
                         setSelectedPage(page.slug);
                         setActiveTab('content');
                         loadPageContent(page.slug);
                       }}
-                      className="px-3 py-1.5 bg-primary text-primary-foreground border-none rounded cursor-pointer text-sm hover:bg-primary/90"
+                      size="sm"
+                      aria-label={`Edit content for ${page.title}`}
                     >
                       Edit Content
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -325,26 +326,29 @@ export default function Admin() {
             <CardContent>
           
           <div className="mb-6">
-            <label className="block mb-2 text-lg font-medium text-foreground">
+            <Label htmlFor="page-select" className="block mb-2 text-lg font-medium text-foreground">
               Select Page:
-            </label>
-            <select
+            </Label>
+            <Select
               value={selectedPage}
-              onChange={(e) => {
-                setSelectedPage(e.target.value);
-                if (e.target.value) {
-                  loadPageContent(e.target.value);
+              onValueChange={(value) => {
+                setSelectedPage(value);
+                if (value) {
+                  loadPageContent(value);
                 }
               }}
-              className="p-2 border border-border rounded text-base min-w-48 bg-background text-foreground"
             >
-              <option value="">Select a page to edit</option>
-              {pages.map((page) => (
-                <option key={page.id} value={page.slug}>
-                  {page.title}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="min-w-48" id="page-select" aria-label="Select a page to edit">
+                <SelectValue placeholder="Select a page to edit" />
+              </SelectTrigger>
+              <SelectContent>
+                {pages.map((page) => (
+                  <SelectItem key={page.id} value={page.slug}>
+                    {page.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {pageContent && pageContent.sections ? (
@@ -375,70 +379,96 @@ export default function Admin() {
                               </span>
                             )}
                           </div>
-                          <button
+                          <Button
                             onClick={() => {
                               setEditingElement(element.id);
                               setEditContent(element.content || '');
                               setEditTitle(element.title || '');
                               setEditMetadata(element.metadata || {});
                             }}
-                            className="px-2 py-1 bg-secondary text-secondary-foreground border-none rounded cursor-pointer text-xs hover:bg-secondary/80"
+                            variant="secondary"
+                            size="sm"
+                            aria-label={`Edit ${element.type}`}
                           >
                             Edit
-                          </button>
+                          </Button>
                         </div>
 
                         {editingElement === element.id ? (
                           <div>
-                            <input
+                            <Label htmlFor={`title-${element.id}`} className="sr-only">
+                              Element Title
+                            </Label>
+                            <Input
+                              id={`title-${element.id}`}
                               type="text"
                               value={editTitle}
                               onChange={(e) => setEditTitle(e.target.value)}
                               placeholder="Enter title..."
-                              className="w-full p-3 border border-border rounded text-sm mb-4 bg-background text-foreground"
+                              className="mb-4"
+                              aria-label="Element title"
                             />
                             {element.type === 'experience_entry' && (
                               <>
-                                <input
+                                <Label htmlFor={`company-${element.id}`} className="sr-only">
+                                  Company Name
+                                </Label>
+                                <Input
+                                  id={`company-${element.id}`}
                                   type="text"
                                   value={editMetadata.company || ''}
                                   onChange={(e) => setEditMetadata({...editMetadata, company: e.target.value})}
                                   placeholder="Enter company name..."
-                                  className="w-full p-3 border border-border rounded text-sm mb-4 bg-background text-foreground"
+                                  className="mb-4"
+                                  aria-label="Company name"
                                 />
-                                <input
+                                <Label htmlFor={`period-${element.id}`} className="sr-only">
+                                  Employment Period
+                                </Label>
+                                <Input
+                                  id={`period-${element.id}`}
                                   type="text"
                                   value={editMetadata.period || ''}
                                   onChange={(e) => setEditMetadata({...editMetadata, period: e.target.value})}
                                   placeholder="Enter period (e.g., 2020 - 2022)..."
-                                  className="w-full p-3 border border-border rounded text-sm mb-4 bg-background text-foreground"
+                                  className="mb-4"
+                                  aria-label="Employment period"
                                 />
                               </>
                             )}
-                            <textarea
+                            <Label htmlFor={`content-${element.id}`} className="sr-only">
+                              Element Content
+                            </Label>
+                            <Textarea
+                              id={`content-${element.id}`}
                               value={editContent}
                               onChange={(e) => setEditContent(e.target.value)}
                               placeholder="Enter content..."
-                              className="w-full min-h-24 p-3 border border-border rounded text-sm mb-4 bg-background text-foreground"
+                              className="min-h-24 mb-4"
+                              aria-label="Element content"
                             />
                             <div className="flex gap-4">
-                              <button
+                              <Button
                                 onClick={() => updateElement(element.id, editTitle, editContent, editMetadata)}
-                                className="px-3 py-1.5 bg-green-600 text-white border-none rounded cursor-pointer text-sm hover:bg-green-700"
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700"
+                                aria-label={`Save changes to ${element.type}`}
                               >
                                 Save
-                              </button>
-                              <button
+                              </Button>
+                              <Button
                                 onClick={() => {
                                   setEditingElement(null);
                                   setEditContent('');
                                   setEditTitle('');
                                   setEditMetadata({});
                                 }}
-                                className="px-3 py-1.5 bg-secondary text-secondary-foreground border-none rounded cursor-pointer text-sm hover:bg-secondary/80"
+                                variant="secondary"
+                                size="sm"
+                                aria-label="Cancel editing"
                               >
                                 Cancel
-                              </button>
+                              </Button>
                             </div>
                           </div>
                         ) : (
@@ -500,29 +530,38 @@ export default function Admin() {
                   
                   {editingSetting === setting.key ? (
                     <div>
-                      <input
+                      <Label htmlFor={`setting-${setting.key}`} className="sr-only">
+                        {setting.key} URL
+                      </Label>
+                      <Input
+                        id={`setting-${setting.key}`}
                         type="text"
                         value={editSettingValue}
                         onChange={(e) => setEditSettingValue(e.target.value)}
-                        className="w-full p-3 border border-border rounded text-sm mb-4 bg-background text-foreground"
+                        className="mb-4"
                         placeholder="Enter URL..."
+                        aria-label={`${setting.key} URL`}
                       />
                       <div className="flex gap-4">
-                        <button
+                        <Button
                           onClick={() => updateSetting(setting.key, editSettingValue)}
-                          className="px-3 py-1.5 bg-green-600 text-white border-none rounded cursor-pointer text-sm hover:bg-green-700"
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700"
+                          aria-label={`Save ${setting.key} setting`}
                         >
                           Save
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => {
                             setEditingSetting(null);
                             setEditSettingValue('');
                           }}
-                          className="px-3 py-1.5 bg-secondary text-secondary-foreground border-none rounded cursor-pointer text-sm hover:bg-secondary/80"
+                          variant="secondary"
+                          size="sm"
+                          aria-label="Cancel editing setting"
                         >
                           Cancel
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ) : (
@@ -530,15 +569,17 @@ export default function Admin() {
                       <code className="bg-muted px-2 py-1 rounded text-xs text-foreground">
                         {setting.value}
                       </code>
-                      <button
+                      <Button
                         onClick={() => {
                           setEditingSetting(setting.key);
                           setEditSettingValue(setting.value);
                         }}
-                        className="px-2 py-1 bg-secondary text-secondary-foreground border-none rounded cursor-pointer text-xs hover:bg-secondary/80"
+                        variant="secondary"
+                        size="sm"
+                        aria-label={`Edit ${setting.key} setting`}
                       >
                         Edit
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
