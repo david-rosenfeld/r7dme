@@ -122,7 +122,7 @@ export default function About() {
               {section.elements.map((experience: any, index: number) => (
                 <motion.div
                   key={experience.id}
-                  className="experience-item"
+                  className="border-l-4 border-primary pl-6"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.1 * index }}
