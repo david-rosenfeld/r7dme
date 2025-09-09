@@ -1,12 +1,17 @@
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, FileText } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { ExternalLink, FileText, Copy, Check } from 'lucide-react';
 import { NetflixHoverGrid, NetflixHoverItem } from '@/components/effects/netflix-hover';
 import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import type { PageWithSections } from '@shared/schema';
 
 export default function Research() {
+  const [copiedCitation, setCopiedCitation] = useState<string | null>(null);
+
   const { data: pageData, isLoading } = useQuery({
     queryKey: ['/api/pages/research'],
     queryFn: async (): Promise<PageWithSections> => {
@@ -17,6 +22,16 @@ export default function Research() {
       return response.json();
     }
   });
+
+  const copyToClipboard = async (text: string, publicationId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedCitation(publicationId);
+      setTimeout(() => setCopiedCitation(null), 2000);
+    } catch (err) {
+      console.error('Failed to copy citation:', err);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -127,22 +142,61 @@ export default function Research() {
                   </p>
                   <div className="flex gap-4">
                     <motion.a
-                      href={publication.metadata?.links?.paper || '#'}
+                      href={publication.metadata?.doiUrl || '#'}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-primary hover:text-primary/80 transition-colors text-sm flex items-center gap-1"
                       whileHover={{ scale: 1.05 }}
-                      data-testid={`link-publication-paper-${index}`}
+                      data-testid={`link-publication-doi-${index}`}
                     >
                       <FileText className="w-4 h-4" />
-                      Read Paper
+                      DOI
                     </motion.a>
-                    <motion.a
-                      href={publication.metadata?.links?.cite || '#'}
-                      className="text-muted-foreground hover:text-foreground transition-colors text-sm"
-                      whileHover={{ scale: 1.05 }}
-                      data-testid={`link-publication-cite-${index}`}
-                    >
-                      Cite
-                    </motion.a>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <motion.button
+                          className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                          whileHover={{ scale: 1.05 }}
+                          data-testid={`button-publication-cite-${index}`}
+                        >
+                          Cite
+                        </motion.button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl">
+                        <DialogHeader>
+                          <DialogTitle>Citation Information</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="font-medium mb-2">Citation Text:</h4>
+                            <div className="bg-muted p-4 rounded-md text-sm font-mono leading-relaxed">
+                              {publication.metadata?.citation || 'Citation not available'}
+                            </div>
+                          </div>
+                          <div className="flex justify-end">
+                            <Button
+                              onClick={() => copyToClipboard(publication.metadata?.citation || '', publication.id)}
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center gap-2"
+                              data-testid={`button-copy-citation-${index}`}
+                            >
+                              {copiedCitation === publication.id ? (
+                                <>
+                                  <Check className="w-4 h-4" />
+                                  Copied!
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-4 h-4" />
+                                  Copy Citation
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 </motion.div>
               ))}
