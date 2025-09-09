@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -255,13 +256,28 @@ export default function Admin() {
         alignItems: 'center',
         marginBottom: '20px'
       }}>
-        <h1 style={{
-          fontSize: '32px',
-          fontWeight: 'bold',
-          color: '#333'
-        }}>
-          Content Management System
-        </h1>
+        <div>
+          <h1 style={{
+            fontSize: '32px',
+            fontWeight: 'bold',
+            color: '#333'
+          }}>
+            Content Management System
+          </h1>
+          {/* Step 1 Test: Single shadcn/ui component */}
+          <div style={{ marginTop: '10px' }}>
+            <Button 
+              variant="outline" 
+              size="sm"
+              style={{ marginRight: '10px' }}
+            >
+              TEST: shadcn/ui Button
+            </Button>
+            <span style={{ fontSize: '12px', color: '#666' }}>
+              ↑ Testing component library compatibility
+            </span>
+          </div>
+        </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button
             onClick={runMigration}
