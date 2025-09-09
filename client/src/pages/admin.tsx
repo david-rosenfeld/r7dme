@@ -175,7 +175,7 @@ export default function Admin() {
 
   if (!isAuthenticated) {
     return (
-      <div className="flex justify-center items-center min-h-screen p-5">
+      <div className="flex justify-center items-center min-h-screen p-6">
         <Card className="w-full max-w-sm">
           <CardHeader>
             <CardTitle className="text-center">
@@ -218,18 +218,18 @@ export default function Admin() {
   }
 
   return (
-    <div className="p-5 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-5">
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground">
             Content Management System
           </h1>
           {/* Step 1 Test: Single shadcn/ui component */}
-          <div className="mt-2.5">
+          <div className="mt-4">
             <Button 
               variant="outline" 
               size="sm"
-              className="mr-2.5"
+              className="mr-4"
             >
               TEST: shadcn/ui Button
             </Button>
@@ -238,7 +238,7 @@ export default function Admin() {
             </span>
           </div>
         </div>
-        <div className="flex gap-2.5">
+        <div className="flex gap-4">
           <Button
             onClick={runMigration}
             className="bg-green-600 hover:bg-green-700 text-white"
@@ -269,11 +269,11 @@ export default function Admin() {
             </CardHeader>
             <CardContent>
               {pages.length > 0 ? (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               {pages.map((page) => (
                 <div
                   key={page.id}
-                  className="bg-muted p-4 rounded border border-border flex justify-between items-center"
+                  className="bg-muted p-6 rounded border border-border flex justify-between items-center"
                 >
                   <div>
                     <h3 className="m-0 mb-1 text-lg text-foreground">
@@ -324,8 +324,8 @@ export default function Admin() {
             </CardHeader>
             <CardContent>
           
-          <div className="mb-5">
-            <label className="block mb-1 font-medium">
+          <div className="mb-6">
+            <label className="block mb-2 font-medium">
               Select Page:
             </label>
             <select
@@ -348,23 +348,23 @@ export default function Admin() {
           </div>
 
           {pageContent && pageContent.sections ? (
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-6">
               {pageContent.sections.map((section: any) => (
                 <div
                   key={section.id}
-                  className="bg-muted p-5 rounded border border-border"
+                  className="bg-muted p-6 rounded border border-border"
                 >
-                  <h3 className="m-0 mb-4 text-xl text-foreground">
+                  <h3 className="m-0 mb-6 text-xl text-foreground">
                     {section.title || `${section.type} Section`}
                   </h3>
                   
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-6">
                     {section.elements.map((element: any) => (
                       <div
                         key={element.id}
-                        className="bg-card p-4 rounded border border-border"
+                        className="bg-card p-6 rounded border border-border"
                       >
-                        <div className="flex justify-between items-start mb-2.5">
+                        <div className="flex justify-between items-start mb-4">
                           <div>
                             <span className="px-1.5 py-0.5 bg-muted rounded text-xs mr-2">
                               {element.type}
@@ -395,7 +395,7 @@ export default function Admin() {
                               value={editTitle}
                               onChange={(e) => setEditTitle(e.target.value)}
                               placeholder="Enter title..."
-                              className="w-full p-2 border border-border rounded text-sm mb-2.5 bg-background text-foreground"
+                              className="w-full p-3 border border-border rounded text-sm mb-4 bg-background text-foreground"
                             />
                             {element.type === 'experience_entry' && (
                               <>
@@ -404,14 +404,14 @@ export default function Admin() {
                                   value={editMetadata.company || ''}
                                   onChange={(e) => setEditMetadata({...editMetadata, company: e.target.value})}
                                   placeholder="Enter company name..."
-                                  className="w-full p-2 border border-border rounded text-sm mb-2.5 bg-background text-foreground"
+                                  className="w-full p-3 border border-border rounded text-sm mb-4 bg-background text-foreground"
                                 />
                                 <input
                                   type="text"
                                   value={editMetadata.period || ''}
                                   onChange={(e) => setEditMetadata({...editMetadata, period: e.target.value})}
                                   placeholder="Enter period (e.g., 2020 - 2022)..."
-                                  className="w-full p-2 border border-border rounded text-sm mb-2.5 bg-background text-foreground"
+                                  className="w-full p-3 border border-border rounded text-sm mb-4 bg-background text-foreground"
                                 />
                               </>
                             )}
@@ -419,9 +419,9 @@ export default function Admin() {
                               value={editContent}
                               onChange={(e) => setEditContent(e.target.value)}
                               placeholder="Enter content..."
-                              className="w-full min-h-24 p-2 border border-border rounded text-sm mb-2.5 bg-background text-foreground"
+                              className="w-full min-h-24 p-3 border border-border rounded text-sm mb-4 bg-background text-foreground"
                             />
-                            <div className="flex gap-2">
+                            <div className="flex gap-4">
                               <button
                                 onClick={() => updateElement(element.id, editTitle, editContent, editMetadata)}
                                 className="px-3 py-1.5 bg-green-600 text-white border-none rounded cursor-pointer text-sm hover:bg-green-700"
@@ -485,16 +485,16 @@ export default function Admin() {
             <CardContent>
           
           {settings.length > 0 ? (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               {settings.map((setting) => (
                 <div
                   key={setting.key}
-                  className="bg-muted p-4 rounded border border-border"
+                  className="bg-muted p-6 rounded border border-border"
                 >
                   <h3 className="m-0 mb-1 text-lg text-foreground">
                     {setting.key.replace(/^social_|_url$/g, '').replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                   </h3>
-                  <p className="m-0 mb-4 text-muted-foreground text-sm">
+                  <p className="m-0 mb-6 text-muted-foreground text-sm">
                     {setting.description}
                   </p>
                   
@@ -504,10 +504,10 @@ export default function Admin() {
                         type="text"
                         value={editSettingValue}
                         onChange={(e) => setEditSettingValue(e.target.value)}
-                        className="w-full p-2 border border-border rounded text-sm mb-2.5 bg-background text-foreground"
+                        className="w-full p-3 border border-border rounded text-sm mb-4 bg-background text-foreground"
                         placeholder="Enter URL..."
                       />
-                      <div className="flex gap-2">
+                      <div className="flex gap-4">
                         <button
                           onClick={() => updateSetting(setting.key, editSettingValue)}
                           className="px-3 py-1.5 bg-green-600 text-white border-none rounded cursor-pointer text-sm hover:bg-green-700"
