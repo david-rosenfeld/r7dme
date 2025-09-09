@@ -205,7 +205,7 @@ export default function Admin() {
     <div className="p-5 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-5">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">
+          <h1 className="text-3xl font-bold text-foreground">
             Content Management System
           </h1>
           {/* Step 1 Test: Single shadcn/ui component */}
