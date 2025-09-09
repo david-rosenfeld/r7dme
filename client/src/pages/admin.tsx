@@ -218,10 +218,10 @@ export default function Admin() {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-8">
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-4xl font-bold text-foreground">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
             Content Management System
           </h1>
           {/* Step 1 Test: Single shadcn/ui component */}
@@ -238,16 +238,19 @@ export default function Admin() {
             </span>
           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
           <Button
             onClick={runMigration}
-            className="bg-green-600 hover:bg-green-700 text-white"
+            className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
+            size="sm"
           >
             Run Migration
           </Button>
           <Button
             onClick={handleLogout}
             variant="secondary"
+            className="w-full sm:w-auto"
+            size="sm"
           >
             Logout
           </Button>
@@ -256,10 +259,10 @@ export default function Admin() {
       
       {/* Tab Navigation */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="pages">Pages</TabsTrigger>
-          <TabsTrigger value="content">Edit Content</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 text-sm">
+          <TabsTrigger value="pages" className="text-xs sm:text-sm">Pages</TabsTrigger>
+          <TabsTrigger value="content" className="text-xs sm:text-sm">Edit Content</TabsTrigger>
+          <TabsTrigger value="settings" className="text-xs sm:text-sm">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pages">
@@ -273,23 +276,23 @@ export default function Admin() {
               {pages.map((page) => (
                 <div
                   key={page.id}
-                  className="bg-muted p-6 rounded border border-border flex justify-between items-center"
+                  className="bg-muted p-4 sm:p-6 rounded border border-border flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0"
                 >
-                  <div>
-                    <h3 className="m-0 mb-2 text-xl font-semibold text-foreground">
+                  <div className="flex-1">
+                    <h3 className="m-0 mb-2 text-lg sm:text-xl font-semibold text-foreground">
                       {page.title}
                     </h3>
                     <p className="m-0 mb-1 text-muted-foreground text-sm">
                       /{page.slug}
                     </p>
                     {page.metaDescription && (
-                      <p className="m-0 text-muted-foreground text-xs">
+                      <p className="m-0 text-muted-foreground text-xs line-clamp-2 sm:line-clamp-none">
                         {page.metaDescription}
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-2.5">
-                    <span className={`px-2 py-1 rounded text-xs ${
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5">
+                    <span className={`px-2 py-1 rounded text-xs text-center sm:text-left ${
                       page.isPublished ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                     }`}>
                       {page.isPublished ? 'Published' : 'Draft'}
@@ -301,6 +304,7 @@ export default function Admin() {
                         loadPageContent(page.slug);
                       }}
                       size="sm"
+                      className="w-full sm:w-auto"
                       aria-label={`Edit content for ${page.title}`}
                     >
                       Edit Content
@@ -321,12 +325,12 @@ export default function Admin() {
         <TabsContent value="content">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl font-semibold text-foreground">Edit Page Content</CardTitle>
+              <CardTitle className="text-xl sm:text-2xl font-semibold text-foreground">Edit Page Content</CardTitle>
             </CardHeader>
             <CardContent>
           
           <div className="mb-6">
-            <Label htmlFor="page-select" className="block mb-2 text-lg font-medium text-foreground">
+            <Label htmlFor="page-select" className="block mb-2 text-base sm:text-lg font-medium text-foreground">
               Select Page:
             </Label>
             <Select
@@ -338,7 +342,7 @@ export default function Admin() {
                 }
               }}
             >
-              <SelectTrigger className="min-w-48" id="page-select" aria-label="Select a page to edit">
+              <SelectTrigger className="w-full sm:min-w-48" id="page-select" aria-label="Select a page to edit">
                 <SelectValue placeholder="Select a page to edit" />
               </SelectTrigger>
               <SelectContent>
@@ -356,9 +360,9 @@ export default function Admin() {
               {pageContent.sections.map((section: any) => (
                 <div
                   key={section.id}
-                  className="bg-muted p-6 rounded border border-border"
+                  className="bg-muted p-4 sm:p-6 rounded border border-border"
                 >
-                  <h3 className="m-0 mb-6 text-xl font-semibold text-foreground">
+                  <h3 className="m-0 mb-4 sm:mb-6 text-lg sm:text-xl font-semibold text-foreground">
                     {section.title || `${section.type} Section`}
                   </h3>
                   
@@ -366,10 +370,10 @@ export default function Admin() {
                     {section.elements.map((element: any) => (
                       <div
                         key={element.id}
-                        className="bg-card p-6 rounded border border-border"
+                        className="bg-card p-4 sm:p-6 rounded border border-border"
                       >
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-0 mb-4">
+                          <div className="flex-1">
                             <span className="px-1.5 py-0.5 bg-muted rounded text-sm mr-2">
                               {element.type}
                             </span>
@@ -388,6 +392,7 @@ export default function Admin() {
                             }}
                             variant="secondary"
                             size="sm"
+                            className="w-full sm:w-auto"
                             aria-label={`Edit ${element.type}`}
                           >
                             Edit
@@ -502,11 +507,11 @@ export default function Admin() {
                                 />
                               </>
                             )}
-                            <div className="flex gap-4">
+                            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                               <Button
                                 onClick={() => updateElement(element.id, editTitle, editContent, editMetadata)}
                                 size="sm"
-                                className="bg-green-600 hover:bg-green-700"
+                                className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                                 aria-label={`Save changes to ${element.type}`}
                               >
                                 Save
@@ -520,6 +525,7 @@ export default function Admin() {
                                 }}
                                 variant="secondary"
                                 size="sm"
+                                className="w-full sm:w-auto"
                                 aria-label="Cancel editing"
                               >
                                 Cancel
@@ -594,7 +600,7 @@ export default function Admin() {
         <TabsContent value="settings">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl font-semibold text-foreground">Site Settings</CardTitle>
+              <CardTitle className="text-xl sm:text-2xl font-semibold text-foreground">Site Settings</CardTitle>
             </CardHeader>
             <CardContent>
           
@@ -603,12 +609,12 @@ export default function Admin() {
               {settings.map((setting) => (
                 <div
                   key={setting.key}
-                  className="bg-muted p-6 rounded border border-border"
+                  className="bg-muted p-4 sm:p-6 rounded border border-border"
                 >
-                  <h3 className="m-0 mb-2 text-xl font-semibold text-foreground">
+                  <h3 className="m-0 mb-2 text-lg sm:text-xl font-semibold text-foreground">
                     {setting.key.replace(/^social_|_url$/g, '').replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                   </h3>
-                  <p className="m-0 mb-6 text-lg text-muted-foreground">
+                  <p className="m-0 mb-4 sm:mb-6 text-base sm:text-lg text-muted-foreground">
                     {setting.description}
                   </p>
                   
@@ -626,11 +632,11 @@ export default function Admin() {
                         placeholder="Enter URL..."
                         aria-label={`${setting.key} URL`}
                       />
-                      <div className="flex gap-4">
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                         <Button
                           onClick={() => updateSetting(setting.key, editSettingValue)}
                           size="sm"
-                          className="bg-green-600 hover:bg-green-700"
+                          className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                           aria-label={`Save ${setting.key} setting`}
                         >
                           Save
@@ -642,6 +648,7 @@ export default function Admin() {
                           }}
                           variant="secondary"
                           size="sm"
+                          className="w-full sm:w-auto"
                           aria-label="Cancel editing setting"
                         >
                           Cancel
@@ -649,8 +656,8 @@ export default function Admin() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex justify-between items-center">
-                      <code className="bg-muted px-2 py-1 rounded text-xs text-foreground">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+                      <code className="bg-muted px-2 py-1 rounded text-xs text-foreground break-all">
                         {setting.value}
                       </code>
                       <Button
@@ -660,6 +667,7 @@ export default function Admin() {
                         }}
                         variant="secondary"
                         size="sm"
+                        className="w-full sm:w-auto"
                         aria-label={`Edit ${setting.key} setting`}
                       >
                         Edit
