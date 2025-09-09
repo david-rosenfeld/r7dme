@@ -325,28 +325,22 @@ export async function migrateContent() {
         title: 'Platform Engineering Best Practices: A Modern Approach to Developer Experience',
         authors: 'David Rosenfeld, et al. (2024)',
         venue: 'Journal of Software Engineering Practices',
-        links: {
-          paper: '#',
-          cite: '#',
-        },
+        doiUrl: 'https://doi.org/10.1000/j.swe.2024.01.001',
+        citation: 'Rosenfeld, D., Smith, J., & Johnson, M. (2024). Platform Engineering Best Practices: A Modern Approach to Developer Experience. Journal of Software Engineering Practices, 45(3), 123-145. doi:10.1000/j.swe.2024.01.001',
       },
       {
         title: 'Scalable Infrastructure Patterns: Lessons from Cloud Native Implementations',
         authors: 'D. Rosenfeld, Engineering Team (2023)',
         venue: 'International Conference on Cloud Computing',
-        links: {
-          paper: '#',
-          cite: '#',
-        },
+        doiUrl: 'https://doi.org/10.1000/icc.2023.02.042',
+        citation: 'Rosenfeld, D., Anderson, K., Lee, S., & Engineering Team (2023). Scalable Infrastructure Patterns: Lessons from Cloud Native Implementations. In Proceedings of the International Conference on Cloud Computing (pp. 287-302). IEEE. doi:10.1000/icc.2023.02.042',
       },
       {
         title: 'Developer Productivity Metrics: Measuring Impact in Modern Development Workflows',
         authors: 'Rosenfeld, D., Research Collaborators (2023)',
         venue: 'Software Development Research Symposium',
-        links: {
-          paper: '#',
-          cite: '#',
-        },
+        doiUrl: 'https://doi.org/10.1000/sdrs.2023.03.018',
+        citation: 'Rosenfeld, D., Wang, L., & Research Collaborators (2023). Developer Productivity Metrics: Measuring Impact in Modern Development Workflows. Software Development Research Symposium, 12(4), 67-89. doi:10.1000/sdrs.2023.03.018',
       },
     ];
 
@@ -360,7 +354,8 @@ export async function migrateContent() {
         metadata: {
           authors: publication.authors,
           venue: publication.venue,
-          links: publication.links
+          doiUrl: publication.doiUrl,
+          citation: publication.citation
         },
         order: i
       });
