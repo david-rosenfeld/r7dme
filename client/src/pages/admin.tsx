@@ -1,5 +1,13 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -161,44 +169,43 @@ export default function Admin() {
   if (!isAuthenticated) {
     return (
       <div className="flex justify-center items-center min-h-screen p-5">
-        <div className="bg-card p-10 rounded-lg shadow-md w-full max-w-sm">
-          <h1 className="text-2xl font-bold mb-5 text-center text-foreground">
-            Admin Login
-          </h1>
-          
-          <form onSubmit={handleLogin}>
-            <div className="mb-5">
-              <label className="block mb-1 font-medium text-muted-foreground">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-2.5 border border-border rounded text-base bg-background text-foreground"
-                required
-              />
-            </div>
-            
-            {error && (
-              <div className="bg-destructive/10 text-destructive p-2.5 rounded mb-5 text-sm">
-                {error}
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle className="text-center">
+              Admin Login
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
               </div>
-            )}
-            
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`w-full py-3 text-primary-foreground border-none rounded text-base font-medium cursor-pointer ${
-                isLoading 
-                  ? 'bg-muted cursor-not-allowed' 
-                  : 'bg-primary hover:bg-primary/90'
-              }`}
-            >
-              {isLoading ? 'Logging in...' : 'Login'}
-            </button>
-          </form>
-        </div>
+              
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>
+                    {error}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full"
+              >
+                {isLoading ? 'Logging in...' : 'Login'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -225,48 +232,36 @@ export default function Admin() {
           </div>
         </div>
         <div className="flex gap-2.5">
-          <button
+          <Button
             onClick={runMigration}
-            className="px-4 py-2 bg-green-600 text-white border-none rounded cursor-pointer hover:bg-green-700"
+            className="bg-green-600 hover:bg-green-700 text-white"
           >
             Run Migration
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleLogout}
-            className="px-4 py-2 bg-secondary text-secondary-foreground border-none rounded cursor-pointer hover:bg-secondary/80"
+            variant="secondary"
           >
             Logout
-          </button>
+          </Button>
         </div>
       </div>
       
       {/* Tab Navigation */}
-      <div className="border-b border-gray-300 mb-5">
-        <div className="flex">
-          {['pages', 'content', 'settings'].map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`py-3 px-6 border-none cursor-pointer text-base capitalize ${
-                activeTab === tab 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'bg-transparent text-foreground border-b border-border hover:bg-muted/50'
-              }`}
-            >
-              {tab === 'content' ? 'Edit Content' : tab}
-            </button>
-          ))}
-        </div>
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="pages">Pages</TabsTrigger>
+          <TabsTrigger value="content">Edit Content</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+        </TabsList>
 
-      {/* Pages Tab */}
-      {activeTab === 'pages' && (
-        <div className="bg-card p-5 rounded-lg border border-border">
-          <h2 className="text-2xl mb-5 text-foreground">
-            Available Pages
-          </h2>
-          
-          {pages.length > 0 ? (
+        <TabsContent value="pages">
+          <Card>
+            <CardHeader>
+              <CardTitle>Available Pages</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {pages.length > 0 ? (
             <div className="flex flex-col gap-4">
               {pages.map((page) => (
                 <div
@@ -307,19 +302,20 @@ export default function Admin() {
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground">
-              No pages found. Run the migration to create default pages.
-            </p>
-          )}
-        </div>
-      )}
+                <p className="text-muted-foreground">
+                  No pages found. Run the migration to create default pages.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Content Tab */}
-      {activeTab === 'content' && (
-        <div className="bg-card p-5 rounded-lg border border-border">
-          <h2 className="text-2xl mb-5 text-foreground">
-            Edit Page Content
-          </h2>
+        <TabsContent value="content">
+          <Card>
+            <CardHeader>
+              <CardTitle>Edit Page Content</CardTitle>
+            </CardHeader>
+            <CardContent>
           
           <div className="mb-5">
             <label className="block mb-1 font-medium">
@@ -434,15 +430,16 @@ export default function Admin() {
           ) : (
             <p className="text-muted-foreground">Select a page to edit its content.</p>
           )}
-        </div>
-      )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Settings Tab */}
-      {activeTab === 'settings' && (
-        <div className="bg-card p-5 rounded-lg border border-border">
-          <h2 className="text-2xl mb-5 text-foreground">
-            Site Settings
-          </h2>
+        <TabsContent value="settings">
+          <Card>
+            <CardHeader>
+              <CardTitle>Site Settings</CardTitle>
+            </CardHeader>
+            <CardContent>
           
           {settings.length > 0 ? (
             <div className="flex flex-col gap-4">
@@ -505,12 +502,14 @@ export default function Admin() {
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground">
-              No settings found. Run the migration to create default settings.
-            </p>
-          )}
-        </div>
-      )}
+              <p className="text-muted-foreground">
+                No settings found. Run the migration to create default settings.
+              </p>
+            )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
