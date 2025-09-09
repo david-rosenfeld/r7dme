@@ -23,6 +23,7 @@ export default function Admin() {
   const [editingElement, setEditingElement] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string>('');
   const [editTitle, setEditTitle] = useState<string>('');
+  const [editMetadata, setEditMetadata] = useState<any>({});
   const [editingSetting, setEditingSetting] = useState<string | null>(null);
   const [editSettingValue, setEditSettingValue] = useState<string>('');
 
@@ -90,21 +91,27 @@ export default function Admin() {
     }
   };
 
-  const updateElement = async (elementId: string, title: string, content: string) => {
+  const updateElement = async (elementId: string, title: string, content: string, metadata?: any) => {
     try {
+      const updateData: any = { title, content };
+      if (metadata && Object.keys(metadata).length > 0) {
+        updateData.metadata = metadata;
+      }
+      
       const response = await fetch(`/api/admin/elements/${elementId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ title, content })
+        body: JSON.stringify(updateData)
       });
       
       if (response.ok) {
         setEditingElement(null);
         setEditContent('');
         setEditTitle('');
+        setEditMetadata({});
         if (selectedPage) {
           loadPageContent(selectedPage);
         }
@@ -373,6 +380,7 @@ export default function Admin() {
                               setEditingElement(element.id);
                               setEditContent(element.content || '');
                               setEditTitle(element.title || '');
+                              setEditMetadata(element.metadata || {});
                             }}
                             className="px-2 py-1 bg-secondary text-secondary-foreground border-none rounded cursor-pointer text-xs hover:bg-secondary/80"
                           >
@@ -389,6 +397,24 @@ export default function Admin() {
                               placeholder="Enter title..."
                               className="w-full p-2 border border-border rounded text-sm mb-2.5 bg-background text-foreground"
                             />
+                            {element.type === 'experience_entry' && (
+                              <>
+                                <input
+                                  type="text"
+                                  value={editMetadata.company || ''}
+                                  onChange={(e) => setEditMetadata({...editMetadata, company: e.target.value})}
+                                  placeholder="Enter company name..."
+                                  className="w-full p-2 border border-border rounded text-sm mb-2.5 bg-background text-foreground"
+                                />
+                                <input
+                                  type="text"
+                                  value={editMetadata.period || ''}
+                                  onChange={(e) => setEditMetadata({...editMetadata, period: e.target.value})}
+                                  placeholder="Enter period (e.g., 2020 - 2022)..."
+                                  className="w-full p-2 border border-border rounded text-sm mb-2.5 bg-background text-foreground"
+                                />
+                              </>
+                            )}
                             <textarea
                               value={editContent}
                               onChange={(e) => setEditContent(e.target.value)}
@@ -397,7 +423,7 @@ export default function Admin() {
                             />
                             <div className="flex gap-2">
                               <button
-                                onClick={() => updateElement(element.id, editTitle, editContent)}
+                                onClick={() => updateElement(element.id, editTitle, editContent, editMetadata)}
                                 className="px-3 py-1.5 bg-green-600 text-white border-none rounded cursor-pointer text-sm hover:bg-green-700"
                               >
                                 Save
@@ -407,6 +433,7 @@ export default function Admin() {
                                   setEditingElement(null);
                                   setEditContent('');
                                   setEditTitle('');
+                                  setEditMetadata({});
                                 }}
                                 className="px-3 py-1.5 bg-secondary text-secondary-foreground border-none rounded cursor-pointer text-sm hover:bg-secondary/80"
                               >
@@ -415,9 +442,25 @@ export default function Admin() {
                             </div>
                           </div>
                         ) : (
-                          <p className="m-0 text-sm text-foreground whitespace-pre-wrap">
-                            {element.content || 'No content'}
-                          </p>
+                          <div>
+                            {element.type === 'experience_entry' && element.metadata && (
+                              <div className="mb-2 text-sm">
+                                {element.metadata.company && (
+                                  <p className="m-0 mb-1 text-muted-foreground">
+                                    <strong>Company:</strong> {element.metadata.company}
+                                  </p>
+                                )}
+                                {element.metadata.period && (
+                                  <p className="m-0 mb-1 text-muted-foreground">
+                                    <strong>Period:</strong> {element.metadata.period}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                            <p className="m-0 text-sm text-foreground whitespace-pre-wrap">
+                              {element.content || 'No content'}
+                            </p>
+                          </div>
                         )}
                       </div>
                     ))}
