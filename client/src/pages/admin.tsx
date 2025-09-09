@@ -436,6 +436,57 @@ export default function Admin() {
                                 />
                               </>
                             )}
+                            {element.type === 'publication' && (
+                              <>
+                                <Label htmlFor={`authors-${element.id}`} className="sr-only">
+                                  Authors
+                                </Label>
+                                <Input
+                                  id={`authors-${element.id}`}
+                                  type="text"
+                                  value={editMetadata.authors || ''}
+                                  onChange={(e) => setEditMetadata({...editMetadata, authors: e.target.value})}
+                                  placeholder="Enter authors..."
+                                  className="mb-4"
+                                  aria-label="Publication authors"
+                                />
+                                <Label htmlFor={`venue-${element.id}`} className="sr-only">
+                                  Publication Venue
+                                </Label>
+                                <Input
+                                  id={`venue-${element.id}`}
+                                  type="text"
+                                  value={editMetadata.venue || ''}
+                                  onChange={(e) => setEditMetadata({...editMetadata, venue: e.target.value})}
+                                  placeholder="Enter publication venue..."
+                                  className="mb-4"
+                                  aria-label="Publication venue"
+                                />
+                                <Label htmlFor={`doiUrl-${element.id}`} className="sr-only">
+                                  DOI URL
+                                </Label>
+                                <Input
+                                  id={`doiUrl-${element.id}`}
+                                  type="url"
+                                  value={editMetadata.doiUrl || ''}
+                                  onChange={(e) => setEditMetadata({...editMetadata, doiUrl: e.target.value})}
+                                  placeholder="Enter DOI URL (e.g., https://doi.org/10.1000/...)..."
+                                  className="mb-4"
+                                  aria-label="DOI URL"
+                                />
+                                <Label htmlFor={`citation-${element.id}`} className="sr-only">
+                                  Citation Text
+                                </Label>
+                                <Textarea
+                                  id={`citation-${element.id}`}
+                                  value={editMetadata.citation || ''}
+                                  onChange={(e) => setEditMetadata({...editMetadata, citation: e.target.value})}
+                                  placeholder="Enter full citation text..."
+                                  className="min-h-20 mb-4"
+                                  aria-label="Citation text"
+                                />
+                              </>
+                            )}
                             <Label htmlFor={`content-${element.id}`} className="sr-only">
                               Element Content
                             </Label>
@@ -484,6 +535,33 @@ export default function Admin() {
                                   <p className="m-0 mb-1 text-muted-foreground">
                                     <strong>Period:</strong> {element.metadata.period}
                                   </p>
+                                )}
+                              </div>
+                            )}
+                            {element.type === 'publication' && element.metadata && (
+                              <div className="mb-2 text-sm">
+                                {element.metadata.authors && (
+                                  <p className="m-0 mb-1 text-muted-foreground">
+                                    <strong>Authors:</strong> {element.metadata.authors}
+                                  </p>
+                                )}
+                                {element.metadata.venue && (
+                                  <p className="m-0 mb-1 text-muted-foreground">
+                                    <strong>Venue:</strong> {element.metadata.venue}
+                                  </p>
+                                )}
+                                {element.metadata.doiUrl && (
+                                  <p className="m-0 mb-1 text-muted-foreground">
+                                    <strong>DOI URL:</strong> <a href={element.metadata.doiUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{element.metadata.doiUrl}</a>
+                                  </p>
+                                )}
+                                {element.metadata.citation && (
+                                  <div className="m-0 mb-1 text-muted-foreground">
+                                    <strong>Citation:</strong>
+                                    <div className="mt-1 p-2 bg-muted rounded text-xs font-mono leading-relaxed">
+                                      {element.metadata.citation}
+                                    </div>
+                                  </div>
                                 )}
                               </div>
                             )}
