@@ -159,27 +159,27 @@ export default function Admin() {
   if (!isAuthenticated) {
     return (
       <div className="flex justify-center items-center min-h-screen p-5">
-        <div className="bg-white p-10 rounded-lg shadow-md w-full max-w-sm">
-          <h1 className="text-2xl font-bold mb-5 text-center text-gray-800">
+        <div className="bg-card p-10 rounded-lg shadow-md w-full max-w-sm">
+          <h1 className="text-2xl font-bold mb-5 text-center text-foreground">
             Admin Login
           </h1>
           
           <form onSubmit={handleLogin}>
             <div className="mb-5">
-              <label className="block mb-1 font-medium text-gray-600">
+              <label className="block mb-1 font-medium text-muted-foreground">
                 Password
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full p-2.5 border border-gray-300 rounded text-base"
+                className="w-full p-2.5 border border-border rounded text-base bg-background text-foreground"
                 required
               />
             </div>
             
             {error && (
-              <div className="bg-red-50 text-red-600 p-2.5 rounded mb-5 text-sm">
+              <div className="bg-destructive/10 text-destructive p-2.5 rounded mb-5 text-sm">
                 {error}
               </div>
             )}
@@ -187,10 +187,10 @@ export default function Admin() {
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full py-3 text-white border-none rounded text-base font-medium cursor-pointer ${
+              className={`w-full py-3 text-primary-foreground border-none rounded text-base font-medium cursor-pointer ${
                 isLoading 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-blue-600 hover:bg-blue-700'
+                  ? 'bg-muted cursor-not-allowed' 
+                  : 'bg-primary hover:bg-primary/90'
               }`}
             >
               {isLoading ? 'Logging in...' : 'Login'}
@@ -217,7 +217,7 @@ export default function Admin() {
             >
               TEST: shadcn/ui Button
             </Button>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               ↑ Testing component library compatibility
             </span>
           </div>
@@ -231,7 +231,7 @@ export default function Admin() {
           </button>
           <button
             onClick={handleLogout}
-            className="px-4 py-2 bg-gray-600 text-white border-none rounded cursor-pointer hover:bg-gray-700"
+            className="px-4 py-2 bg-secondary text-secondary-foreground border-none rounded cursor-pointer hover:bg-secondary/80"
           >
             Logout
           </button>
@@ -247,8 +247,8 @@ export default function Admin() {
               onClick={() => setActiveTab(tab)}
               className={`py-3 px-6 border-none cursor-pointer text-base capitalize ${
                 activeTab === tab 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-transparent text-gray-800 border-b border-gray-300 hover:bg-gray-50'
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'bg-transparent text-foreground border-b border-border hover:bg-muted/50'
               }`}
             >
               {tab === 'content' ? 'Edit Content' : tab}
@@ -259,8 +259,8 @@ export default function Admin() {
 
       {/* Pages Tab */}
       {activeTab === 'pages' && (
-        <div className="bg-white p-5 rounded-lg border border-gray-300">
-          <h2 className="text-2xl mb-5 text-gray-800">
+        <div className="bg-card p-5 rounded-lg border border-border">
+          <h2 className="text-2xl mb-5 text-foreground">
             Available Pages
           </h2>
           
@@ -269,17 +269,17 @@ export default function Admin() {
               {pages.map((page) => (
                 <div
                   key={page.id}
-                  className="bg-gray-50 p-4 rounded border border-gray-200 flex justify-between items-center"
+                  className="bg-muted p-4 rounded border border-border flex justify-between items-center"
                 >
                   <div>
-                    <h3 className="m-0 mb-1 text-lg text-gray-800">
+                    <h3 className="m-0 mb-1 text-lg text-foreground">
                       {page.title}
                     </h3>
-                    <p className="m-0 mb-1 text-gray-600 text-sm">
+                    <p className="m-0 mb-1 text-muted-foreground text-sm">
                       /{page.slug}
                     </p>
                     {page.metaDescription && (
-                      <p className="m-0 text-gray-500 text-xs">
+                      <p className="m-0 text-muted-foreground text-xs">
                         {page.metaDescription}
                       </p>
                     )}
@@ -296,7 +296,7 @@ export default function Admin() {
                         setActiveTab('content');
                         loadPageContent(page.slug);
                       }}
-                      className="px-3 py-1.5 bg-blue-600 text-white border-none rounded cursor-pointer text-sm hover:bg-blue-700"
+                      className="px-3 py-1.5 bg-primary text-primary-foreground border-none rounded cursor-pointer text-sm hover:bg-primary/90"
                     >
                       Edit Content
                     </button>
@@ -305,7 +305,7 @@ export default function Admin() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               No pages found. Run the migration to create default pages.
             </p>
           )}
@@ -314,8 +314,8 @@ export default function Admin() {
 
       {/* Content Tab */}
       {activeTab === 'content' && (
-        <div className="bg-white p-5 rounded-lg border border-gray-300">
-          <h2 className="text-2xl mb-5 text-gray-800">
+        <div className="bg-card p-5 rounded-lg border border-border">
+          <h2 className="text-2xl mb-5 text-foreground">
             Edit Page Content
           </h2>
           
@@ -331,7 +331,7 @@ export default function Admin() {
                   loadPageContent(e.target.value);
                 }
               }}
-              className="p-2 border border-gray-300 rounded text-base min-w-48"
+              className="p-2 border border-border rounded text-base min-w-48 bg-background text-foreground"
             >
               <option value="">Select a page to edit</option>
               {pages.map((page) => (
@@ -347,9 +347,9 @@ export default function Admin() {
               {pageContent.sections.map((section: any) => (
                 <div
                   key={section.id}
-                  className="bg-gray-50 p-5 rounded border border-gray-200"
+                  className="bg-muted p-5 rounded border border-border"
                 >
-                  <h3 className="m-0 mb-4 text-xl text-gray-800">
+                  <h3 className="m-0 mb-4 text-xl text-foreground">
                     {section.title || `${section.type} Section`}
                   </h3>
                   
@@ -357,11 +357,11 @@ export default function Admin() {
                     {section.elements.map((element: any) => (
                       <div
                         key={element.id}
-                        className="bg-white p-4 rounded border border-gray-300"
+                        className="bg-card p-4 rounded border border-border"
                       >
                         <div className="flex justify-between items-start mb-2.5">
                           <div>
-                            <span className="px-1.5 py-0.5 bg-gray-200 rounded text-xs mr-2">
+                            <span className="px-1.5 py-0.5 bg-muted rounded text-xs mr-2">
                               {element.type}
                             </span>
                             {element.title && (
@@ -375,7 +375,7 @@ export default function Admin() {
                               setEditingElement(element.id);
                               setEditContent(element.content || '');
                             }}
-                            className="px-2 py-1 bg-gray-600 text-white border-none rounded cursor-pointer text-xs hover:bg-gray-700"
+                            className="px-2 py-1 bg-secondary text-secondary-foreground border-none rounded cursor-pointer text-xs hover:bg-secondary/80"
                           >
                             Edit
                           </button>
@@ -386,7 +386,7 @@ export default function Admin() {
                             <textarea
                               value={editContent}
                               onChange={(e) => setEditContent(e.target.value)}
-                              className="w-full min-h-24 p-2 border border-gray-300 rounded text-sm mb-2.5"
+                              className="w-full min-h-24 p-2 border border-border rounded text-sm mb-2.5 bg-background text-foreground"
                             />
                             <div className="flex gap-2">
                               <button
@@ -400,14 +400,14 @@ export default function Admin() {
                                   setEditingElement(null);
                                   setEditContent('');
                                 }}
-                                className="px-3 py-1.5 bg-gray-600 text-white border-none rounded cursor-pointer text-sm hover:bg-gray-700"
+                                className="px-3 py-1.5 bg-secondary text-secondary-foreground border-none rounded cursor-pointer text-sm hover:bg-secondary/80"
                               >
                                 Cancel
                               </button>
                             </div>
                           </div>
                         ) : (
-                          <p className="m-0 text-sm text-gray-700 whitespace-pre-wrap">
+                          <p className="m-0 text-sm text-foreground whitespace-pre-wrap">
                             {element.content || 'No content'}
                           </p>
                         )}
@@ -418,17 +418,17 @@ export default function Admin() {
               ))}
             </div>
           ) : selectedPage ? (
-            <p className="text-gray-600">Loading page content...</p>
+            <p className="text-muted-foreground">Loading page content...</p>
           ) : (
-            <p className="text-gray-600">Select a page to edit its content.</p>
+            <p className="text-muted-foreground">Select a page to edit its content.</p>
           )}
         </div>
       )}
 
       {/* Settings Tab */}
       {activeTab === 'settings' && (
-        <div className="bg-white p-5 rounded-lg border border-gray-300">
-          <h2 className="text-2xl mb-5 text-gray-800">
+        <div className="bg-card p-5 rounded-lg border border-border">
+          <h2 className="text-2xl mb-5 text-foreground">
             Site Settings
           </h2>
           
@@ -437,12 +437,12 @@ export default function Admin() {
               {settings.map((setting) => (
                 <div
                   key={setting.key}
-                  className="bg-gray-50 p-4 rounded border border-gray-200"
+                  className="bg-muted p-4 rounded border border-border"
                 >
-                  <h3 className="m-0 mb-1 text-lg text-gray-800">
+                  <h3 className="m-0 mb-1 text-lg text-foreground">
                     {setting.key.replace(/^social_|_url$/g, '').replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                   </h3>
-                  <p className="m-0 mb-4 text-gray-600 text-sm">
+                  <p className="m-0 mb-4 text-muted-foreground text-sm">
                     {setting.description}
                   </p>
                   
@@ -452,7 +452,7 @@ export default function Admin() {
                         type="text"
                         value={editSettingValue}
                         onChange={(e) => setEditSettingValue(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded text-sm mb-2.5"
+                        className="w-full p-2 border border-border rounded text-sm mb-2.5 bg-background text-foreground"
                         placeholder="Enter URL..."
                       />
                       <div className="flex gap-2">
@@ -467,7 +467,7 @@ export default function Admin() {
                             setEditingSetting(null);
                             setEditSettingValue('');
                           }}
-                          className="px-3 py-1.5 bg-gray-600 text-white border-none rounded cursor-pointer text-sm hover:bg-gray-700"
+                          className="px-3 py-1.5 bg-secondary text-secondary-foreground border-none rounded cursor-pointer text-sm hover:bg-secondary/80"
                         >
                           Cancel
                         </button>
@@ -475,7 +475,7 @@ export default function Admin() {
                     </div>
                   ) : (
                     <div className="flex justify-between items-center">
-                      <code className="bg-gray-200 px-2 py-1 rounded text-xs">
+                      <code className="bg-muted px-2 py-1 rounded text-xs text-foreground">
                         {setting.value}
                       </code>
                       <button
@@ -483,7 +483,7 @@ export default function Admin() {
                           setEditingSetting(setting.key);
                           setEditSettingValue(setting.value);
                         }}
-                        className="px-2 py-1 bg-gray-600 text-white border-none rounded cursor-pointer text-xs hover:bg-gray-700"
+                        className="px-2 py-1 bg-secondary text-secondary-foreground border-none rounded cursor-pointer text-xs hover:bg-secondary/80"
                       >
                         Edit
                       </button>
@@ -493,7 +493,7 @@ export default function Admin() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               No settings found. Run the migration to create default settings.
             </p>
           )}
