@@ -108,6 +108,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Dropdown options routes
+  app.get("/api/dropdown-options/:fieldName", async (req, res) => {
+    try {
+      const { fieldName } = req.params;
+      const options = await storage.getDropdownOptions(fieldName);
+      res.json(options);
+    } catch (error: any) {
+      console.error("Error fetching dropdown options:", error);
+      res.status(500).json({ error: "Failed to fetch dropdown options" });
+    }
+  });
+
+  app.get("/api/admin/dropdown-options", requireAuth, async (_req, res) => {
+    try {
+      const options = await storage.getAllDropdownOptions();
+      res.json(options);
+    } catch (error: any) {
+      console.error("Error fetching all dropdown options:", error);
+      res.status(500).json({ error: "Failed to fetch dropdown options" });
+    }
+  });
+
   // Page management endpoints
   app.post("/api/admin/pages", requireAuth, async (req, res) => {
     try {

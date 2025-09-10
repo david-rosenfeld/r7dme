@@ -52,6 +52,17 @@ export const siteSettings = pgTable("site_settings", {
   updatedAt: timestamp("updated_at").defaultNow()
 });
 
+export const dropdownOptions = pgTable("dropdown_options", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fieldName: text("field_name").notNull(), // e.g., 'research_status'
+  optionValue: text("option_value").notNull(),
+  optionLabel: text("option_label").notNull(),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
 // Zod schemas for validation
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
@@ -81,10 +92,17 @@ export const insertSiteSettingSchema = createInsertSchema(siteSettings).omit({
   updatedAt: true
 });
 
+export const insertDropdownOptionSchema = createInsertSchema(dropdownOptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 export const updatePageSchema = insertPageSchema.partial();
 export const updatePageSectionSchema = insertPageSectionSchema.partial().omit({ pageId: true });
 export const updateContentElementSchema = insertContentElementSchema.partial().omit({ sectionId: true });
 export const updateSiteSettingSchema = insertSiteSettingSchema.partial().omit({ key: true });
+export const updateDropdownOptionSchema = insertDropdownOptionSchema.partial().omit({ fieldName: true });
 
 // Type definitions
 export type User = typeof users.$inferSelect;
@@ -105,6 +123,10 @@ export type UpdateContentElement = z.infer<typeof updateContentElementSchema>;
 export type SiteSetting = typeof siteSettings.$inferSelect;
 export type InsertSiteSetting = z.infer<typeof insertSiteSettingSchema>;
 export type UpdateSiteSetting = z.infer<typeof updateSiteSettingSchema>;
+
+export type DropdownOption = typeof dropdownOptions.$inferSelect;
+export type InsertDropdownOption = z.infer<typeof insertDropdownOptionSchema>;
+export type UpdateDropdownOption = z.infer<typeof updateDropdownOptionSchema>;
 
 // Complex types for nested data
 export type PageWithSections = Page & {

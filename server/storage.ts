@@ -14,7 +14,10 @@ import {
   type SectionWithElements,
   type SiteSetting,
   type InsertSiteSetting,
-  type UpdateSiteSetting
+  type UpdateSiteSetting,
+  type DropdownOption,
+  type InsertDropdownOption,
+  type UpdateDropdownOption
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -52,6 +55,14 @@ export interface IStorage {
   createSetting(setting: InsertSiteSetting): Promise<SiteSetting>;
   updateSetting(key: string, setting: UpdateSiteSetting): Promise<SiteSetting>;
   deleteSetting(key: string): Promise<void>;
+
+  // Dropdown Options methods
+  getDropdownOptions(fieldName: string): Promise<DropdownOption[]>;
+  getAllDropdownOptions(): Promise<DropdownOption[]>;
+  getDropdownOption(id: string): Promise<DropdownOption | undefined>;
+  createDropdownOption(option: InsertDropdownOption): Promise<DropdownOption>;
+  updateDropdownOption(id: string, option: UpdateDropdownOption): Promise<DropdownOption>;
+  deleteDropdownOption(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -60,6 +71,7 @@ export class MemStorage implements IStorage {
   private pageSections: Map<string, PageSection>;
   private contentElements: Map<string, ContentElement>;
   private siteSettings: Map<string, SiteSetting>;
+  private dropdownOptions: Map<string, DropdownOption>;
 
   constructor() {
     this.users = new Map();
@@ -67,6 +79,7 @@ export class MemStorage implements IStorage {
     this.pageSections = new Map();
     this.contentElements = new Map();
     this.siteSettings = new Map();
+    this.dropdownOptions = new Map();
   }
 
   // User methods
@@ -296,6 +309,56 @@ export class MemStorage implements IStorage {
     if (setting) {
       this.siteSettings.delete(key);
     }
+  }
+
+  // Dropdown Options methods
+  async getDropdownOptions(fieldName: string): Promise<DropdownOption[]> {
+    return Array.from(this.dropdownOptions.values())
+      .filter(option => option.fieldName === fieldName && option.isActive)
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  }
+
+  async getAllDropdownOptions(): Promise<DropdownOption[]> {
+    return Array.from(this.dropdownOptions.values())
+      .sort((a, b) => a.fieldName.localeCompare(b.fieldName) || (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+  }
+
+  async getDropdownOption(id: string): Promise<DropdownOption | undefined> {
+    return this.dropdownOptions.get(id);
+  }
+
+  async createDropdownOption(insertOption: InsertDropdownOption): Promise<DropdownOption> {
+    const id = randomUUID();
+    const now = new Date();
+    const option: DropdownOption = {
+      id,
+      fieldName: insertOption.fieldName,
+      optionValue: insertOption.optionValue,
+      optionLabel: insertOption.optionLabel,
+      sortOrder: insertOption.sortOrder ?? 0,
+      isActive: insertOption.isActive ?? true,
+      createdAt: now,
+      updatedAt: now
+    };
+    this.dropdownOptions.set(id, option);
+    return option;
+  }
+
+  async updateDropdownOption(id: string, updateOption: UpdateDropdownOption): Promise<DropdownOption> {
+    const existing = this.dropdownOptions.get(id);
+    if (!existing) throw new Error('Dropdown option not found');
+    
+    const updated: DropdownOption = {
+      ...existing,
+      ...updateOption,
+      updatedAt: new Date()
+    };
+    this.dropdownOptions.set(id, updated);
+    return updated;
+  }
+
+  async deleteDropdownOption(id: string): Promise<void> {
+    this.dropdownOptions.delete(id);
   }
 }
 

@@ -419,9 +419,23 @@ export async function migrateContent() {
       description: 'X (Twitter) profile URL'
     });
 
+    // Create dropdown options for research status
+    const researchStatusOptions = [
+      { fieldName: 'research_status', optionValue: 'ongoing', optionLabel: 'Ongoing', sortOrder: 0 },
+      { fieldName: 'research_status', optionValue: 'submitted', optionLabel: 'Submitted', sortOrder: 1 },
+      { fieldName: 'research_status', optionValue: 'in_review', optionLabel: 'In Review', sortOrder: 2 },
+      { fieldName: 'research_status', optionValue: 'accepted', optionLabel: 'Accepted', sortOrder: 3 },
+      { fieldName: 'research_status', optionValue: 'published', optionLabel: 'Published', sortOrder: 4 }
+    ];
+
+    for (const option of researchStatusOptions) {
+      await storage.createDropdownOption(option);
+    }
+
     console.log("Content migration completed successfully!");
     console.log(`Created ${await (await storage.getAllPages()).length} pages`);
     console.log(`Created ${await (await storage.getAllSettings()).length} settings`);
+    console.log(`Created ${researchStatusOptions.length} dropdown options`);
 
   } catch (error) {
     console.error("Content migration failed:", error);
