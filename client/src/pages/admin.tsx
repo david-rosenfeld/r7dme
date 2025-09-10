@@ -1041,6 +1041,241 @@ export default function Admin() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="dropdowns">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-foreground">Dropdown Options Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              
+              {/* Add New Dropdown Option */}
+              <div className="mb-8 p-4 sm:p-6 bg-muted rounded border border-border">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Add New Option</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <Label htmlFor="new-field-name" className="text-sm font-medium">Field Name</Label>
+                    <Select
+                      value={newOptionFieldName}
+                      onValueChange={setNewOptionFieldName}
+                    >
+                      <SelectTrigger className="w-full" id="new-field-name" data-testid="select-new-field-name">
+                        <SelectValue placeholder="Select field name" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="research_status">Research Status</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="new-option-value" className="text-sm font-medium">Option Value</Label>
+                    <Input
+                      id="new-option-value"
+                      type="text"
+                      value={newOptionValue}
+                      onChange={(e) => setNewOptionValue(e.target.value)}
+                      placeholder="e.g., in_progress"
+                      data-testid="input-new-option-value"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="new-option-label" className="text-sm font-medium">Option Label</Label>
+                    <Input
+                      id="new-option-label"
+                      type="text"
+                      value={newOptionLabel}
+                      onChange={(e) => setNewOptionLabel(e.target.value)}
+                      placeholder="e.g., In Progress"
+                      data-testid="input-new-option-label"
+                    />
+                  </div>
+                </div>
+                <Button
+                  onClick={() => createDropdownOption(newOptionFieldName, newOptionValue, newOptionLabel)}
+                  disabled={!newOptionValue || !newOptionLabel || savingDropdownOption === 'new'}
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700"
+                  data-testid="button-create-option"
+                >
+                  {savingDropdownOption === 'new' ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Add Option'
+                  )}
+                </Button>
+              </div>
+
+              {/* Existing Dropdown Options */}
+              {loadingDropdownOptions ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                  Loading dropdown options...
+                </div>
+              ) : allDropdownOptions.length > 0 ? (
+                <div className="flex flex-col gap-6">
+                  {/* Group options by field name */}
+                  {Object.entries(
+                    allDropdownOptions.reduce((groups: Record<string, any[]>, option) => {
+                      if (!groups[option.fieldName]) {
+                        groups[option.fieldName] = [];
+                      }
+                      groups[option.fieldName].push(option);
+                      return groups;
+                    }, {} as Record<string, any[]>)
+                  ).map(([fieldName, options]) => (
+                    <div key={fieldName} className="bg-muted p-4 sm:p-6 rounded border border-border">
+                      <h3 className="text-lg font-semibold text-foreground mb-4 capitalize">
+                        {fieldName.replace(/_/g, ' ')} Options
+                      </h3>
+                      <div className="space-y-3">
+                        {options
+                          .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+                          .map((option) => (
+                          <div
+                            key={option.id}
+                            className="bg-card p-4 rounded border border-border flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0"
+                          >
+                            {editingDropdownOption === option.id ? (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="flex-1"
+                              >
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                  <div>
+                                    <Label htmlFor={`edit-value-${option.id}`} className="text-sm font-medium">Option Value</Label>
+                                    <Input
+                                      id={`edit-value-${option.id}`}
+                                      type="text"
+                                      value={editDropdownValue}
+                                      onChange={(e) => setEditDropdownValue(e.target.value)}
+                                      placeholder="e.g., in_progress"
+                                      data-testid={`input-edit-value-${option.id}`}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor={`edit-label-${option.id}`} className="text-sm font-medium">Option Label</Label>
+                                    <Input
+                                      id={`edit-label-${option.id}`}
+                                      type="text"
+                                      value={editDropdownLabel}
+                                      onChange={(e) => setEditDropdownLabel(e.target.value)}
+                                      placeholder="e.g., In Progress"
+                                      data-testid={`input-edit-label-${option.id}`}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                                  <Button
+                                    onClick={() => updateDropdownOption(option.id, editDropdownFieldName, editDropdownValue, editDropdownLabel)}
+                                    disabled={!editDropdownValue || !editDropdownLabel || savingDropdownOption === option.id}
+                                    size="sm"
+                                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+                                    data-testid={`button-save-option-${option.id}`}
+                                  >
+                                    {savingDropdownOption === option.id ? (
+                                      <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Saving...
+                                      </>
+                                    ) : (
+                                      'Save'
+                                    )}
+                                  </Button>
+                                  <Button
+                                    onClick={() => {
+                                      setEditingDropdownOption(null);
+                                      setEditDropdownFieldName('');
+                                      setEditDropdownValue('');
+                                      setEditDropdownLabel('');
+                                    }}
+                                    variant="secondary"
+                                    size="sm"
+                                    className="w-full sm:w-auto"
+                                    data-testid={`button-cancel-edit-${option.id}`}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </motion.div>
+                            ) : (
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.2 }}
+                                className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0"
+                              >
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <Badge variant="outline" className="text-xs" data-testid={`badge-option-value-${option.id}`}>
+                                      {option.optionValue}
+                                    </Badge>
+                                    <span className="text-foreground font-medium" data-testid={`text-option-label-${option.id}`}>
+                                      {option.optionLabel}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                    <span>Sort Order: {option.sortOrder ?? 0}</span>
+                                    <span>•</span>
+                                    <span className={option.isActive ? 'text-green-600' : 'text-red-600'}>
+                                      {option.isActive ? 'Active' : 'Inactive'}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                  <Button
+                                    onClick={() => {
+                                      setEditingDropdownOption(option.id);
+                                      setEditDropdownFieldName(option.fieldName);
+                                      setEditDropdownValue(option.optionValue);
+                                      setEditDropdownLabel(option.optionLabel);
+                                    }}
+                                    variant="secondary"
+                                    size="sm"
+                                    className="w-full sm:w-auto"
+                                    data-testid={`button-edit-option-${option.id}`}
+                                  >
+                                    Edit
+                                  </Button>
+                                  <Button
+                                    onClick={() => deleteDropdownOption(option.id)}
+                                    disabled={savingDropdownOption === option.id}
+                                    variant="destructive"
+                                    size="sm"
+                                    className="w-full sm:w-auto"
+                                    data-testid={`button-delete-option-${option.id}`}
+                                  >
+                                    {savingDropdownOption === option.id ? (
+                                      <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Deleting...
+                                      </>
+                                    ) : (
+                                      'Delete'
+                                    )}
+                                  </Button>
+                                </div>
+                              </motion.div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-lg text-muted-foreground">
+                  No dropdown options found. Create some options above.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );
