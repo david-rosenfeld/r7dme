@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -35,11 +35,34 @@ export default function Admin() {
   const [migrationLoading, setMigrationLoading] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const [researchStatusOptions, setResearchStatusOptions] = useState<any[]>([]);
+  const [loadingStatusOptions, setLoadingStatusOptions] = useState<boolean>(false);
 
   const clearMessages = () => {
     setSuccessMessage('');
     setErrorMessage('');
   };
+
+  const loadResearchStatusOptions = async () => {
+    setLoadingStatusOptions(true);
+    try {
+      const response = await fetch('/api/dropdown-options/research_status');
+      if (response.ok) {
+        const options = await response.json();
+        setResearchStatusOptions(options);
+      }
+    } catch (err) {
+      console.error('Failed to load research status options:', err);
+    } finally {
+      setLoadingStatusOptions(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadResearchStatusOptions();
+    }
+  }, [isAuthenticated]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -582,7 +605,42 @@ export default function Admin() {
                                 />
                               </>
                             )}
-                            {element.type !== 'publication' && (
+                            {element.type === 'research_project' && (
+                              <>
+                                <Label htmlFor={`status-${element.id}`} className="block mb-2 text-sm font-medium">
+                                  Project Status
+                                </Label>
+                                <Select
+                                  value={editMetadata.status || ''}
+                                  onValueChange={(value) => setEditMetadata({...editMetadata, status: value})}
+                                  disabled={loadingStatusOptions}
+                                >
+                                  <SelectTrigger className="w-full mb-4" data-testid={`select-status-${element.id}`}>
+                                    <SelectValue placeholder="Select project status" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {researchStatusOptions.map((option) => (
+                                      <SelectItem key={option.id} value={option.optionValue}>
+                                        {option.optionLabel}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <Label htmlFor={`tags-${element.id}`} className="sr-only">
+                                  Project Tags
+                                </Label>
+                                <Input
+                                  id={`tags-${element.id}`}
+                                  type="text"
+                                  value={editMetadata.tags ? editMetadata.tags.join(', ') : ''}
+                                  onChange={(e) => setEditMetadata({...editMetadata, tags: e.target.value.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag)})}
+                                  placeholder="Enter tags separated by commas..."
+                                  className="mb-4"
+                                  aria-label="Project tags"
+                                />
+                              </>
+                            )}
+                            {element.type !== 'publication' && element.type !== 'research_project' && (
                               <>
                                 <Label htmlFor={`content-${element.id}`} className="sr-only">
                                   Element Content
@@ -594,6 +652,21 @@ export default function Admin() {
                                   placeholder="Enter content..."
                                   className="min-h-24 mb-4"
                                   aria-label="Element content"
+                                />
+                              </>
+                            )}
+                            {element.type === 'research_project' && (
+                              <>
+                                <Label htmlFor={`content-${element.id}`} className="sr-only">
+                                  Project Description
+                                </Label>
+                                <Textarea
+                                  id={`content-${element.id}`}
+                                  value={editContent}
+                                  onChange={(e) => setEditContent(e.target.value)}
+                                  placeholder="Enter project description..."
+                                  className="min-h-24 mb-4"
+                                  aria-label="Project description"
                                 />
                               </>
                             )}
@@ -677,9 +750,47 @@ export default function Admin() {
                                 )}
                               </div>
                             )}
-                            {element.type !== 'publication' && (
+                            {element.type === 'research_project' && element.metadata && (
+                              <div className="mb-2 text-sm">
+                                {element.metadata.status && (
+                                  <p className="m-0 mb-1 text-muted-foreground">
+                                    <strong>Status:</strong> 
+                                    <Badge 
+                                      variant={
+                                        element.metadata.status === 'published' ? 'default' :
+                                        element.metadata.status === 'accepted' ? 'secondary' :
+                                        element.metadata.status === 'in_review' ? 'outline' :
+                                        'destructive'
+                                      }
+                                      className="ml-2"
+                                      data-testid={`badge-status-${element.id}`}
+                                    >
+                                      {researchStatusOptions.find(opt => opt.optionValue === element.metadata.status)?.optionLabel || element.metadata.status}
+                                    </Badge>
+                                  </p>
+                                )}
+                                {element.metadata.tags && element.metadata.tags.length > 0 && (
+                                  <div className="m-0 mb-1 text-muted-foreground">
+                                    <strong>Tags:</strong>
+                                    <div className="mt-1 flex flex-wrap gap-1">
+                                      {element.metadata.tags.map((tag: string, index: number) => (
+                                        <Badge key={index} variant="outline" className="text-xs" data-testid={`badge-tag-${element.id}-${index}`}>
+                                          {tag}
+                                        </Badge>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {element.type !== 'publication' && element.type !== 'research_project' && (
                               <p className="m-0 text-sm text-foreground whitespace-pre-wrap">
                                 {element.content || 'No content'}
+                              </p>
+                            )}
+                            {element.type === 'research_project' && (
+                              <p className="m-0 text-sm text-foreground whitespace-pre-wrap">
+                                {element.content || 'No description'}
                               </p>
                             )}
                           </motion.div>
