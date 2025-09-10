@@ -23,6 +23,17 @@ export default function Research() {
     }
   });
 
+  const { data: researchStatusOptions = [] } = useQuery({
+    queryKey: ['/api/dropdown-options/research_status'],
+    queryFn: async () => {
+      const response = await fetch('/api/dropdown-options/research_status');
+      if (!response.ok) {
+        throw new Error('Failed to fetch research status options');
+      }
+      return response.json();
+    }
+  });
+
   const copyToClipboard = async (text: string, publicationId: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -229,11 +240,16 @@ export default function Research() {
                         {project.title}
                       </h4>
                       <Badge
-                        variant="secondary"
-                        className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full"
+                        variant={
+                          project.metadata?.status === 'published' ? 'default' :
+                          project.metadata?.status === 'accepted' ? 'secondary' :
+                          project.metadata?.status === 'in_review' ? 'outline' :
+                          'destructive'
+                        }
+                        className="text-sm px-3 py-1 rounded-full"
                         data-testid={`badge-project-status-${index}`}
                       >
-                        {project.metadata?.status}
+                        {researchStatusOptions.find((opt: any) => opt.optionValue === project.metadata?.status)?.optionLabel || project.metadata?.status}
                       </Badge>
                     </div>
                     <p className="text-muted-foreground mb-4" data-testid={`text-ongoing-description-${index}`}>
