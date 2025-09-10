@@ -298,22 +298,12 @@ export default function Admin() {
 
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
+          <h1 className="text-4xl font-bold text-foreground">
             Content Management System
           </h1>
-          {/* Step 1 Test: Single shadcn/ui component */}
-          <div className="mt-4">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="mr-4"
-            >
-              TEST: shadcn/ui Button
-            </Button>
-            <span className="text-xs text-muted-foreground">
-              ↑ Testing component library compatibility
-            </span>
-          </div>
+          <p className="text-lg text-muted-foreground leading-relaxed mt-2">
+            Manage your website content, settings, and data
+          </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
           <Button
@@ -353,7 +343,7 @@ export default function Admin() {
         <TabsContent value="pages">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl font-semibold text-foreground">Available Pages</CardTitle>
+              <CardTitle className="text-2xl font-bold text-foreground">Available Pages</CardTitle>
             </CardHeader>
             <CardContent>
               {loadingPages ? (
@@ -415,7 +405,7 @@ export default function Admin() {
         <TabsContent value="content">
           <Card>
             <CardHeader>
-              <CardTitle className="text-xl sm:text-2xl font-semibold text-foreground">Edit Page Content</CardTitle>
+              <CardTitle className="text-2xl font-bold text-foreground">Edit Page Content</CardTitle>
             </CardHeader>
             <CardContent>
           
@@ -712,7 +702,7 @@ export default function Admin() {
         <TabsContent value="settings">
           <Card>
             <CardHeader>
-              <CardTitle className="text-xl sm:text-2xl font-semibold text-foreground">Site Settings</CardTitle>
+              <CardTitle className="text-2xl font-bold text-foreground">Site Settings</CardTitle>
             </CardHeader>
             <CardContent>
           
