@@ -122,20 +122,15 @@ export default function Research() {
             <h3 className="text-2xl font-semibold mb-6 text-foreground" data-testid="text-publications-title">
               {section.title}
             </h3>
-            <NetflixHoverGrid cols={1} className="space-y-6">
+            <div className="space-y-6">
               {section.elements.map((publication: any, index: number) => (
-                <NetflixHoverItem
+                <motion.div
                   key={publication.id}
-                  index={index}
-                  totalItems={section.elements.length}
-                  cols={1}
+                  className="border-l-4 border-primary pl-6"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 * index }}
                 >
-                  <motion.div
-                    className="border-l-4 border-primary pl-6"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: 0.1 * index }}
-                  >
                     <h4 className="text-lg font-semibold mb-2 text-foreground" data-testid={`text-publication-title-${index}`}>
                       "{publication.title}"
                     </h4>
@@ -204,9 +199,8 @@ export default function Research() {
                       </Dialog>
                     </div>
                   </motion.div>
-                </NetflixHoverItem>
               ))}
-            </NetflixHoverGrid>
+            </div>
           </motion.div>
         );
 
