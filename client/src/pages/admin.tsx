@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -26,11 +28,24 @@ export default function Admin() {
   const [editMetadata, setEditMetadata] = useState<any>({});
   const [editingSetting, setEditingSetting] = useState<string | null>(null);
   const [editSettingValue, setEditSettingValue] = useState<string>('');
+  const [loadingPages, setLoadingPages] = useState<boolean>(false);
+  const [loadingContent, setLoadingContent] = useState<boolean>(false);
+  const [savingElement, setSavingElement] = useState<string | null>(null);
+  const [savingSetting, setSavingSetting] = useState<string | null>(null);
+  const [migrationLoading, setMigrationLoading] = useState<boolean>(false);
+  const [successMessage, setSuccessMessage] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
+  const clearMessages = () => {
+    setSuccessMessage('');
+    setErrorMessage('');
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
+    clearMessages();
     
     try {
       const response = await fetch('/api/admin/login', {
@@ -59,6 +74,7 @@ export default function Admin() {
   };
 
   const loadData = async () => {
+    setLoadingPages(true);
     try {
       const [pagesRes, settingsRes] = await Promise.all([
         fetch('/api/pages'),
@@ -76,10 +92,14 @@ export default function Admin() {
       }
     } catch (err) {
       console.error('Failed to load data:', err);
+      setErrorMessage('Failed to load data. Please try again.');
+    } finally {
+      setLoadingPages(false);
     }
   };
 
   const loadPageContent = async (slug: string) => {
+    setLoadingContent(true);
     try {
       const response = await fetch(`/api/pages/${slug}`);
       if (response.ok) {
@@ -88,10 +108,14 @@ export default function Admin() {
       }
     } catch (err) {
       console.error('Failed to load page content:', err);
+      setErrorMessage('Failed to load page content. Please try again.');
+    } finally {
+      setLoadingContent(false);
     }
   };
 
   const updateElement = async (elementId: string, title: string, content: string, metadata?: any) => {
+    setSavingElement(elementId);
     try {
       const updateData: any = { title, content };
       if (metadata && Object.keys(metadata).length > 0) {
@@ -112,16 +136,24 @@ export default function Admin() {
         setEditContent('');
         setEditTitle('');
         setEditMetadata({});
+        setSuccessMessage('Element updated successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
         if (selectedPage) {
           loadPageContent(selectedPage);
         }
+      } else {
+        setErrorMessage('Failed to update element. Please try again.');
       }
     } catch (err) {
       console.error('Failed to update element:', err);
+      setErrorMessage('Failed to update element. Please try again.');
+    } finally {
+      setSavingElement(null);
     }
   };
 
   const updateSetting = async (key: string, value: string) => {
+    setSavingSetting(key);
     try {
       const response = await fetch(`/api/admin/settings/${key}`, {
         method: 'PUT',
@@ -135,14 +167,22 @@ export default function Admin() {
       if (response.ok) {
         setEditingSetting(null);
         setEditSettingValue('');
+        setSuccessMessage('Setting updated successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
         loadData();
+      } else {
+        setErrorMessage('Failed to update setting. Please try again.');
       }
     } catch (err) {
       console.error('Failed to update setting:', err);
+      setErrorMessage('Failed to update setting. Please try again.');
+    } finally {
+      setSavingSetting(null);
     }
   };
 
   const runMigration = async () => {
+    setMigrationLoading(true);
     try {
       const response = await fetch('/api/admin/migrate', {
         method: 'POST',
@@ -154,11 +194,16 @@ export default function Admin() {
       
       if (response.ok) {
         loadData();
-        alert('Migration completed successfully!');
+        setSuccessMessage('Migration completed successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+      } else {
+        setErrorMessage('Migration failed. Please try again.');
       }
     } catch (err) {
       console.error('Failed to run migration:', err);
-      alert('Migration failed. Check console for details.');
+      setErrorMessage('Migration failed. Check console for details.');
+    } finally {
+      setMigrationLoading(false);
     }
   };
 
@@ -171,6 +216,8 @@ export default function Admin() {
     setSettings([]);
     setSelectedPage('');
     setPageContent(null);
+    setSuccessMessage('');
+    setErrorMessage('');
   };
 
   if (!isAuthenticated) {
@@ -219,6 +266,36 @@ export default function Admin() {
 
   return (
     <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+      {/* Success/Error Messages */}
+      <AnimatePresence>
+        {successMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="mb-6"
+          >
+            <Alert className="border-green-200 bg-green-50 text-green-800">
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>{successMessage}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+        {errorMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="mb-6"
+          >
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
@@ -241,10 +318,18 @@ export default function Admin() {
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
           <Button
             onClick={runMigration}
+            disabled={migrationLoading}
             className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
             size="sm"
           >
-            Run Migration
+            {migrationLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Running...
+              </>
+            ) : (
+              'Run Migration'
+            )}
           </Button>
           <Button
             onClick={handleLogout}
@@ -258,7 +343,7 @@ export default function Admin() {
       </div>
       
       {/* Tab Navigation */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); clearMessages(); }} className="w-full">
         <TabsList className="grid w-full grid-cols-3 text-sm">
           <TabsTrigger value="pages" className="text-xs sm:text-sm">Pages</TabsTrigger>
           <TabsTrigger value="content" className="text-xs sm:text-sm">Edit Content</TabsTrigger>
@@ -271,7 +356,12 @@ export default function Admin() {
               <CardTitle className="text-2xl font-semibold text-foreground">Available Pages</CardTitle>
             </CardHeader>
             <CardContent>
-              {pages.length > 0 ? (
+              {loadingPages ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                  Loading pages...
+                </div>
+              ) : pages.length > 0 ? (
             <div className="flex flex-col gap-6">
               {pages.map((page) => (
                 <div
@@ -355,7 +445,12 @@ export default function Admin() {
             </Select>
           </div>
 
-          {pageContent && pageContent.sections ? (
+          {loadingContent ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin mr-2" />
+              Loading content...
+            </div>
+          ) : pageContent && pageContent.sections ? (
             <div className="flex flex-col gap-6">
               {pageContent.sections.map((section: any) => (
                 <div
@@ -400,7 +495,12 @@ export default function Admin() {
                         </div>
 
                         {editingElement === element.id ? (
-                          <div>
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3 }}
+                          >
                             <Label htmlFor={`title-${element.id}`} className="sr-only">
                               Element Title
                             </Label>
@@ -510,11 +610,19 @@ export default function Admin() {
                             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                               <Button
                                 onClick={() => updateElement(element.id, editTitle, editContent, editMetadata)}
+                                disabled={savingElement === element.id}
                                 size="sm"
                                 className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                                 aria-label={`Save changes to ${element.type}`}
                               >
-                                Save
+                                {savingElement === element.id ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                  </>
+                                ) : (
+                                  'Save'
+                                )}
                               </Button>
                               <Button
                                 onClick={() => {
@@ -531,9 +639,13 @@ export default function Admin() {
                                 Cancel
                               </Button>
                             </div>
-                          </div>
+                          </motion.div>
                         ) : (
-                          <div>
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.2 }}
+                          >
                             {element.type === 'experience_entry' && element.metadata && (
                               <div className="mb-2 text-sm">
                                 {element.metadata.company && (
@@ -580,7 +692,7 @@ export default function Admin() {
                                 {element.content || 'No content'}
                               </p>
                             )}
-                          </div>
+                          </motion.div>
                         )}
                       </div>
                     ))}
@@ -619,7 +731,12 @@ export default function Admin() {
                   </p>
                   
                   {editingSetting === setting.key ? (
-                    <div>
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
                       <Label htmlFor={`setting-${setting.key}`} className="sr-only">
                         {setting.key} URL
                       </Label>
@@ -635,11 +752,19 @@ export default function Admin() {
                       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                         <Button
                           onClick={() => updateSetting(setting.key, editSettingValue)}
+                          disabled={savingSetting === setting.key}
                           size="sm"
                           className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
                           aria-label={`Save ${setting.key} setting`}
                         >
-                          Save
+                          {savingSetting === setting.key ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            'Save'
+                          )}
                         </Button>
                         <Button
                           onClick={() => {
@@ -654,9 +779,14 @@ export default function Admin() {
                           Cancel
                         </Button>
                       </div>
-                    </div>
+                    </motion.div>
                   ) : (
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+                    <motion.div 
+                      className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.2 }}
+                    >
                       <code className="bg-muted px-2 py-1 rounded text-xs text-foreground break-all">
                         {setting.value}
                       </code>
@@ -672,7 +802,7 @@ export default function Admin() {
                       >
                         Edit
                       </Button>
-                    </div>
+                    </motion.div>
                   )}
                 </div>
               ))}
