@@ -15,6 +15,64 @@ import {
   updateDropdownOptionSchema
 } from "@shared/schema";
 
+// Session storage
+interface Session {
+  token: string;
+  createdAt: Date;
+  expiresAt: Date;
+}
+
+class SessionManager {
+  private sessions: Map<string, Session> = new Map();
+  private readonly SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
+  createSession(): string {
+    const token = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + this.SESSION_DURATION);
+    
+    this.sessions.set(token, {
+      token,
+      createdAt: now,
+      expiresAt
+    });
+
+    // Clean up expired sessions
+    this.cleanupExpiredSessions();
+    
+    return token;
+  }
+
+  validateSession(token: string): boolean {
+    const session = this.sessions.get(token);
+    if (!session) {
+      return false;
+    }
+
+    if (new Date() > session.expiresAt) {
+      this.sessions.delete(token);
+      return false;
+    }
+
+    return true;
+  }
+
+  deleteSession(token: string): void {
+    this.sessions.delete(token);
+  }
+
+  private cleanupExpiredSessions(): void {
+    const now = new Date();
+    for (const [token, session] of this.sessions.entries()) {
+      if (now > session.expiresAt) {
+        this.sessions.delete(token);
+      }
+    }
+  }
+}
+
+const sessionManager = new SessionManager();
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint for deployment verification
   app.get("/health", (_req, res) => {
@@ -70,8 +128,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid password" });
       }
       
-      // Generate a session token (in production, use proper JWT)
-      const sessionToken = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // Create a proper session token
+      const sessionToken = sessionManager.createSession();
       
       res.json({ 
         token: sessionToken,
@@ -86,18 +144,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const requireAuth = (req: any, res: any, next: any) => {
     const authHeader = req.headers.authorization;
     
-    if (!authHeader || !authHeader.startsWith('Bearer session_')) {
-      return res.status(401).json({ error: "Unauthorized" });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: "Unauthorized - Missing or invalid authorization header" });
     }
     
-    // In production, validate the session token properly
     const token = authHeader.split(' ')[1];
-    if (!token.startsWith('session_')) {
-      return res.status(401).json({ error: "Invalid token" });
+    if (!token || !sessionManager.validateSession(token)) {
+      return res.status(401).json({ error: "Unauthorized - Invalid or expired session token" });
     }
     
     next();
   };
+
+  // Admin logout endpoint
+  app.post("/api/admin/logout", requireAuth, async (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (authHeader) {
+        const token = authHeader.split(' ')[1];
+        sessionManager.deleteSession(token);
+      }
+      
+      res.json({ message: "Logged out successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Logout failed" });
+    }
+  });
 
   // Migration endpoint for initializing content
   app.post("/api/admin/migrate", requireAuth, async (_req, res) => {

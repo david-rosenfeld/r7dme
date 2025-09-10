@@ -71,7 +71,11 @@ export default function Admin() {
   const loadAllDropdownOptions = async () => {
     setLoadingDropdownOptions(true);
     try {
-      const response = await fetch('/api/dropdown-options');
+      const response = await fetch('/api/admin/dropdown-options', {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
       if (response.ok) {
         const options = await response.json();
         setAllDropdownOptions(options);
@@ -354,17 +358,31 @@ export default function Admin() {
     }
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setAuthToken('');
-    setPassword('');
-    setError('');
-    setPages([]);
-    setSettings([]);
-    setSelectedPage('');
-    setPageContent(null);
-    setSuccessMessage('');
-    setErrorMessage('');
+  const handleLogout = async () => {
+    try {
+      // Call the logout endpoint to invalidate the session
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+    } catch (err) {
+      console.error('Logout request failed:', err);
+    } finally {
+      // Clear local state regardless of server response
+      setIsAuthenticated(false);
+      setAuthToken('');
+      setPassword('');
+      setError('');
+      setPages([]);
+      setSettings([]);
+      setSelectedPage('');
+      setPageContent(null);
+      setSuccessMessage('');
+      setErrorMessage('');
+    }
   };
 
   if (!isAuthenticated) {
