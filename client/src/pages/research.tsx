@@ -240,13 +240,8 @@ export default function Research() {
                         {project.title}
                       </h4>
                       <Badge
-                        variant={
-                          project.metadata?.status === 'published' ? 'default' :
-                          project.metadata?.status === 'accepted' ? 'secondary' :
-                          project.metadata?.status === 'in_review' ? 'outline' :
-                          'destructive'
-                        }
-                        className="text-sm px-3 py-1 rounded-full"
+                        variant="secondary"
+                        className="text-sm px-3 py-1 rounded-full text-foreground"
                         data-testid={`badge-project-status-${index}`}
                       >
                         {researchStatusOptions.find((opt: any) => opt.optionValue === project.metadata?.status)?.optionLabel || project.metadata?.status}
