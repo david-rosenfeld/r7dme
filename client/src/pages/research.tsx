@@ -122,85 +122,91 @@ export default function Research() {
             <h3 className="text-2xl font-semibold mb-6 text-foreground" data-testid="text-publications-title">
               {section.title}
             </h3>
-            <div className="space-y-6">
+            <NetflixHoverGrid cols={1} className="space-y-6">
               {section.elements.map((publication: any, index: number) => (
-                <motion.div
+                <NetflixHoverItem
                   key={publication.id}
-                  className="border-l-4 border-primary pl-6"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 * index }}
+                  index={index}
+                  totalItems={section.elements.length}
+                  cols={1}
                 >
-                  <h4 className="text-lg font-semibold mb-2 text-foreground" data-testid={`text-publication-title-${index}`}>
-                    "{publication.title}"
-                  </h4>
-                  <p className="text-muted-foreground mb-2" data-testid={`text-publication-authors-${index}`}>
-                    {publication.metadata?.authors}
-                  </p>
-                  <p className="text-sm text-muted-foreground mb-3" data-testid={`text-publication-venue-${index}`}>
-                    Published in {publication.metadata?.venue}
-                  </p>
-                  <div className="flex gap-4">
-                    <motion.a
-                      href={publication.metadata?.doiUrl || '#'}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:text-primary/80 transition-colors text-sm flex items-center gap-1"
-                      whileHover={{ scale: 1.05 }}
-                      data-testid={`link-publication-doi-${index}`}
-                    >
-                      <FileText className="w-4 h-4" />
-                      DOI
-                    </motion.a>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <motion.button
-                          className="text-muted-foreground hover:text-foreground transition-colors text-sm"
-                          whileHover={{ scale: 1.05 }}
-                          data-testid={`button-publication-cite-${index}`}
-                        >
-                          Cite
-                        </motion.button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
-                        <DialogHeader>
-                          <DialogTitle>Citation Information</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-medium mb-2">Citation Text:</h4>
-                            <div className="bg-muted p-4 rounded-md text-sm font-mono leading-relaxed">
-                              {publication.metadata?.citation || 'Citation not available'}
+                  <motion.div
+                    className="border-l-4 border-primary pl-6"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 * index }}
+                  >
+                    <h4 className="text-lg font-semibold mb-2 text-foreground" data-testid={`text-publication-title-${index}`}>
+                      "{publication.title}"
+                    </h4>
+                    <p className="text-muted-foreground mb-2" data-testid={`text-publication-authors-${index}`}>
+                      {publication.metadata?.authors}
+                    </p>
+                    <p className="text-sm text-muted-foreground mb-3" data-testid={`text-publication-venue-${index}`}>
+                      Published in {publication.metadata?.venue}
+                    </p>
+                    <div className="flex gap-4">
+                      <motion.a
+                        href={publication.metadata?.doiUrl || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:text-primary/80 transition-colors text-sm flex items-center gap-1"
+                        whileHover={{ scale: 1.05 }}
+                        data-testid={`link-publication-doi-${index}`}
+                      >
+                        <FileText className="w-4 h-4" />
+                        DOI
+                      </motion.a>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <motion.button
+                            className="text-muted-foreground hover:text-foreground transition-colors text-sm"
+                            whileHover={{ scale: 1.05 }}
+                            data-testid={`button-publication-cite-${index}`}
+                          >
+                            Cite
+                          </motion.button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>Citation Information</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <h4 className="font-medium mb-2">Citation Text:</h4>
+                              <div className="bg-muted p-4 rounded-md text-sm font-mono leading-relaxed">
+                                {publication.metadata?.citation || 'Citation not available'}
+                              </div>
+                            </div>
+                            <div className="flex justify-end">
+                              <Button
+                                onClick={() => copyToClipboard(publication.metadata?.citation || '', publication.id)}
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-2"
+                                data-testid={`button-copy-citation-${index}`}
+                              >
+                                {copiedCitation === publication.id ? (
+                                  <>
+                                    <Check className="w-4 h-4" />
+                                    Copied!
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-4 h-4" />
+                                    Copy Citation
+                                  </>
+                                )}
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex justify-end">
-                            <Button
-                              onClick={() => copyToClipboard(publication.metadata?.citation || '', publication.id)}
-                              variant="outline"
-                              size="sm"
-                              className="flex items-center gap-2"
-                              data-testid={`button-copy-citation-${index}`}
-                            >
-                              {copiedCitation === publication.id ? (
-                                <>
-                                  <Check className="w-4 h-4" />
-                                  Copied!
-                                </>
-                              ) : (
-                                <>
-                                  <Copy className="w-4 h-4" />
-                                  Copy Citation
-                                </>
-                              )}
-                            </Button>
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </motion.div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </motion.div>
+                </NetflixHoverItem>
               ))}
-            </div>
+            </NetflixHoverGrid>
           </motion.div>
         );
 
