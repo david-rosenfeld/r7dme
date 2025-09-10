@@ -37,6 +37,16 @@ export default function Admin() {
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [researchStatusOptions, setResearchStatusOptions] = useState<any[]>([]);
   const [loadingStatusOptions, setLoadingStatusOptions] = useState<boolean>(false);
+  const [allDropdownOptions, setAllDropdownOptions] = useState<any[]>([]);
+  const [loadingDropdownOptions, setLoadingDropdownOptions] = useState<boolean>(false);
+  const [editingDropdownOption, setEditingDropdownOption] = useState<string | null>(null);
+  const [newOptionFieldName, setNewOptionFieldName] = useState<string>('research_status');
+  const [newOptionValue, setNewOptionValue] = useState<string>('');
+  const [newOptionLabel, setNewOptionLabel] = useState<string>('');
+  const [editDropdownFieldName, setEditDropdownFieldName] = useState<string>('');
+  const [editDropdownValue, setEditDropdownValue] = useState<string>('');
+  const [editDropdownLabel, setEditDropdownLabel] = useState<string>('');
+  const [savingDropdownOption, setSavingDropdownOption] = useState<string | null>(null);
 
   const clearMessages = () => {
     setSuccessMessage('');
@@ -58,9 +68,123 @@ export default function Admin() {
     }
   };
 
+  const loadAllDropdownOptions = async () => {
+    setLoadingDropdownOptions(true);
+    try {
+      const response = await fetch('/api/dropdown-options');
+      if (response.ok) {
+        const options = await response.json();
+        setAllDropdownOptions(options);
+      }
+    } catch (err) {
+      console.error('Failed to load dropdown options:', err);
+      setErrorMessage('Failed to load dropdown options. Please try again.');
+    } finally {
+      setLoadingDropdownOptions(false);
+    }
+  };
+
+  const createDropdownOption = async (fieldName: string, optionValue: string, optionLabel: string) => {
+    setSavingDropdownOption('new');
+    try {
+      const response = await fetch('/api/admin/dropdown-options', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fieldName,
+          optionValue,
+          optionLabel,
+          sortOrder: allDropdownOptions.filter(opt => opt.fieldName === fieldName).length
+        })
+      });
+      
+      if (response.ok) {
+        setNewOptionValue('');
+        setNewOptionLabel('');
+        setSuccessMessage('Dropdown option created successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        loadAllDropdownOptions();
+        loadResearchStatusOptions();
+      } else {
+        setErrorMessage('Failed to create dropdown option. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to create dropdown option:', err);
+      setErrorMessage('Failed to create dropdown option. Please try again.');
+    } finally {
+      setSavingDropdownOption(null);
+    }
+  };
+
+  const updateDropdownOption = async (id: string, fieldName: string, optionValue: string, optionLabel: string) => {
+    setSavingDropdownOption(id);
+    try {
+      const response = await fetch(`/api/admin/dropdown-options/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fieldName,
+          optionValue,
+          optionLabel
+        })
+      });
+      
+      if (response.ok) {
+        setEditingDropdownOption(null);
+        setEditDropdownFieldName('');
+        setEditDropdownValue('');
+        setEditDropdownLabel('');
+        setSuccessMessage('Dropdown option updated successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        loadAllDropdownOptions();
+        loadResearchStatusOptions();
+      } else {
+        setErrorMessage('Failed to update dropdown option. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to update dropdown option:', err);
+      setErrorMessage('Failed to update dropdown option. Please try again.');
+    } finally {
+      setSavingDropdownOption(null);
+    }
+  };
+
+  const deleteDropdownOption = async (id: string) => {
+    setSavingDropdownOption(id);
+    try {
+      const response = await fetch(`/api/admin/dropdown-options/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      
+      if (response.ok) {
+        setSuccessMessage('Dropdown option deleted successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        loadAllDropdownOptions();
+        loadResearchStatusOptions();
+      } else {
+        setErrorMessage('Failed to delete dropdown option. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to delete dropdown option:', err);
+      setErrorMessage('Failed to delete dropdown option. Please try again.');
+    } finally {
+      setSavingDropdownOption(null);
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       loadResearchStatusOptions();
+      loadAllDropdownOptions();
     }
   }, [isAuthenticated]);
 
@@ -357,10 +481,11 @@ export default function Admin() {
       
       {/* Tab Navigation */}
       <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); clearMessages(); }} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 text-sm">
+        <TabsList className="grid w-full grid-cols-4 text-sm">
           <TabsTrigger value="pages" className="text-xs sm:text-sm">Pages</TabsTrigger>
           <TabsTrigger value="content" className="text-xs sm:text-sm">Edit Content</TabsTrigger>
           <TabsTrigger value="settings" className="text-xs sm:text-sm">Settings</TabsTrigger>
+          <TabsTrigger value="dropdowns" className="text-xs sm:text-sm">Dropdown Options</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pages">

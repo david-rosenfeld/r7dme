@@ -10,7 +10,9 @@ import {
   updatePageSectionSchema,
   updateContentElementSchema,
   insertSiteSettingSchema,
-  updateSiteSettingSchema
+  updateSiteSettingSchema,
+  insertDropdownOptionSchema,
+  updateDropdownOptionSchema
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -127,6 +129,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error fetching all dropdown options:", error);
       res.status(500).json({ error: "Failed to fetch dropdown options" });
+    }
+  });
+
+  // Dropdown Options management endpoints
+  app.post("/api/admin/dropdown-options", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertDropdownOptionSchema.parse(req.body);
+      const option = await storage.createDropdownOption(validatedData);
+      res.status(201).json(option);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create dropdown option" });
+    }
+  });
+
+  app.put("/api/admin/dropdown-options/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = updateDropdownOptionSchema.parse(req.body);
+      const option = await storage.updateDropdownOption(id, validatedData);
+      res.json(option);
+    } catch (error: any) {
+      if (error.message === 'Dropdown option not found') {
+        return res.status(404).json({ error: "Dropdown option not found" });
+      }
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update dropdown option" });
+    }
+  });
+
+  app.delete("/api/admin/dropdown-options/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteDropdownOption(id);
+      res.status(204).send();
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to delete dropdown option" });
     }
   });
 
