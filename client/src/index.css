@@ -124,13 +124,8 @@
   }
 }
 
-/* Navigation item container styles */
-.nav-item-container:hover .nav-line {
-  width: 48px !important;
-}
-
 .nav-line {
-  background-color: var(--primary) !important;
+  background-color: var(--primary);
 }
 
 .experience-item {
