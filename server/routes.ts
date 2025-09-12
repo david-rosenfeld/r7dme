@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { randomUUID } from "crypto";
 import { storage } from "./storage";
 import { migrateContent } from "./migrate-content";
 import {
@@ -12,7 +13,11 @@ import {
   insertSiteSettingSchema,
   updateSiteSettingSchema,
   insertDropdownOptionSchema,
-  updateDropdownOptionSchema
+  updateDropdownOptionSchema,
+  insertSectionTypeDefinitionSchema,
+  updateSectionTypeDefinitionSchema,
+  insertContentElementTypeDefinitionSchema,
+  updateContentElementTypeDefinitionSchema
 } from "@shared/schema";
 
 // Session storage
@@ -27,7 +32,7 @@ class SessionManager {
   private readonly SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
   createSession(): string {
-    const token = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const token = `session_${randomUUID()}`;
     const now = new Date();
     const expiresAt = new Date(now.getTime() + this.SESSION_DURATION);
     
@@ -63,7 +68,7 @@ class SessionManager {
 
   private cleanupExpiredSessions(): void {
     const now = new Date();
-    for (const [token, session] of this.sessions.entries()) {
+    for (const [token, session] of Array.from(this.sessions.entries())) {
       if (now > session.expiresAt) {
         this.sessions.delete(token);
       }
@@ -406,6 +411,265 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: "Failed to delete setting" });
+    }
+  });
+
+  // Section Type Definitions endpoints
+  app.get("/api/admin/section-types", requireAuth, async (_req, res) => {
+    try {
+      const sectionTypes = await storage.getAllSectionTypeDefinitions();
+      res.json(sectionTypes);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch section types" });
+    }
+  });
+
+  app.get("/api/admin/section-types/active", requireAuth, async (_req, res) => {
+    try {
+      const sectionTypes = await storage.getActiveSectionTypeDefinitions();
+      res.json(sectionTypes);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch active section types" });
+    }
+  });
+
+  app.get("/api/admin/section-types/:name", requireAuth, async (req, res) => {
+    try {
+      const { name } = req.params;
+      const sectionType = await storage.getSectionTypeDefinitionByName(name);
+      if (!sectionType) {
+        return res.status(404).json({ error: "Section type not found" });
+      }
+      res.json(sectionType);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch section type" });
+    }
+  });
+
+  app.post("/api/admin/section-types", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertSectionTypeDefinitionSchema.parse(req.body);
+      const sectionType = await storage.createSectionTypeDefinition(validatedData);
+      res.status(201).json(sectionType);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create section type" });
+    }
+  });
+
+  app.put("/api/admin/section-types/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = updateSectionTypeDefinitionSchema.parse(req.body);
+      const sectionType = await storage.updateSectionTypeDefinition(id, validatedData);
+      res.json(sectionType);
+    } catch (error: any) {
+      if (error.message === 'Section type definition not found') {
+        return res.status(404).json({ error: "Section type not found" });
+      }
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update section type" });
+    }
+  });
+
+  app.delete("/api/admin/section-types/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteSectionTypeDefinition(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete section type" });
+    }
+  });
+
+  // Content Element Type Definitions endpoints
+  app.get("/api/admin/element-types", requireAuth, async (_req, res) => {
+    try {
+      const elementTypes = await storage.getAllContentElementTypeDefinitions();
+      res.json(elementTypes);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch element types" });
+    }
+  });
+
+  app.get("/api/admin/element-types/active", requireAuth, async (_req, res) => {
+    try {
+      const elementTypes = await storage.getActiveContentElementTypeDefinitions();
+      res.json(elementTypes);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch active element types" });
+    }
+  });
+
+  app.get("/api/admin/element-types/section/:sectionType", requireAuth, async (req, res) => {
+    try {
+      const { sectionType } = req.params;
+      const elementTypes = await storage.getContentElementTypeDefinitionsForSection(sectionType);
+      res.json(elementTypes);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch element types for section" });
+    }
+  });
+
+  app.get("/api/admin/element-types/:name", requireAuth, async (req, res) => {
+    try {
+      const { name } = req.params;
+      const elementType = await storage.getContentElementTypeDefinitionByName(name);
+      if (!elementType) {
+        return res.status(404).json({ error: "Element type not found" });
+      }
+      res.json(elementType);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch element type" });
+    }
+  });
+
+  app.post("/api/admin/element-types", requireAuth, async (req, res) => {
+    try {
+      const validatedData = insertContentElementTypeDefinitionSchema.parse(req.body);
+      const elementType = await storage.createContentElementTypeDefinition(validatedData);
+      res.status(201).json(elementType);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create element type" });
+    }
+  });
+
+  app.put("/api/admin/element-types/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = updateContentElementTypeDefinitionSchema.parse(req.body);
+      const elementType = await storage.updateContentElementTypeDefinition(id, validatedData);
+      res.json(elementType);
+    } catch (error: any) {
+      if (error.message === 'Content element type definition not found') {
+        return res.status(404).json({ error: "Element type not found" });
+      }
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ error: "Invalid data", details: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update element type" });
+    }
+  });
+
+  app.delete("/api/admin/element-types/:id", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteContentElementTypeDefinition(id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete element type" });
+    }
+  });
+
+  // Bulk operations endpoints
+  app.delete("/api/admin/sections/bulk", requireAuth, async (req, res) => {
+    try {
+      const { sectionIds } = req.body;
+      if (!Array.isArray(sectionIds)) {
+        return res.status(400).json({ error: "sectionIds must be an array" });
+      }
+      await storage.bulkDeleteSections(sectionIds);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete sections" });
+    }
+  });
+
+  app.delete("/api/admin/elements/bulk", requireAuth, async (req, res) => {
+    try {
+      const { elementIds } = req.body;
+      if (!Array.isArray(elementIds)) {
+        return res.status(400).json({ error: "elementIds must be an array" });
+      }
+      await storage.bulkDeleteElements(elementIds);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete elements" });
+    }
+  });
+
+  // Reordering endpoints
+  app.post("/api/admin/sections/reorder", requireAuth, async (req, res) => {
+    try {
+      const { sectionOrders } = req.body;
+      if (!Array.isArray(sectionOrders)) {
+        return res.status(400).json({ error: "sectionOrders must be an array" });
+      }
+      
+      // Handle empty array as no-op
+      if (sectionOrders.length === 0) {
+        return res.status(200).json({ message: "No sections to reorder" });
+      }
+      
+      await storage.reorderSections(sectionOrders);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to reorder sections" });
+    }
+  });
+
+  app.post("/api/admin/elements/reorder", requireAuth, async (req, res) => {
+    try {
+      const { elementOrders } = req.body;
+      if (!Array.isArray(elementOrders)) {
+        return res.status(400).json({ error: "elementOrders must be an array" });
+      }
+      
+      // Handle empty array as no-op
+      if (elementOrders.length === 0) {
+        return res.status(200).json({ message: "No elements to reorder" });
+      }
+      
+      await storage.reorderElements(elementOrders);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to reorder elements" });
+    }
+  });
+
+  // Duplication endpoints
+  app.post("/api/admin/sections/:id/duplicate", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { targetPageId } = req.body;
+      
+      if (!targetPageId) {
+        return res.status(400).json({ error: "targetPageId is required" });
+      }
+      
+      const duplicatedSection = await storage.duplicateSection(id, targetPageId);
+      res.status(201).json(duplicatedSection);
+    } catch (error: any) {
+      if (error.message === 'Section not found') {
+        return res.status(404).json({ error: "Section not found" });
+      }
+      res.status(500).json({ error: "Failed to duplicate section" });
+    }
+  });
+
+  app.post("/api/admin/elements/:id/duplicate", requireAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { targetSectionId } = req.body;
+      
+      if (!targetSectionId) {
+        return res.status(400).json({ error: "targetSectionId is required" });
+      }
+      
+      const duplicatedElement = await storage.duplicateElement(id, targetSectionId);
+      res.status(201).json(duplicatedElement);
+    } catch (error: any) {
+      if (error.message === 'Content element not found') {
+        return res.status(404).json({ error: "Element not found" });
+      }
+      res.status(500).json({ error: "Failed to duplicate element" });
     }
   });
 
