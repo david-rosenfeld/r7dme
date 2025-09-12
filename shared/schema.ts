@@ -25,6 +25,7 @@ export const pageSections = pgTable("page_sections", {
   pageId: varchar("page_id").notNull().references(() => pages.id, { onDelete: "cascade" }),
   type: text("type").notNull(), // 'hero', 'bio', 'skills', 'experience', 'projects'
   title: text("title"), // Section heading like "About Me", "Skills & Technologies"
+  layoutConfig: json("layout_config"), // Layout configuration: { columns: 2, style: 'grid', responsive: true }
   order: integer("order").default(0),
   isPublished: boolean("is_published").default(true),
   createdAt: timestamp("created_at").defaultNow(),
@@ -58,6 +59,32 @@ export const dropdownOptions = pgTable("dropdown_options", {
   optionValue: text("option_value").notNull(),
   optionLabel: text("option_label").notNull(),
   sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+// Section type definitions - defines available section types and their default configurations
+export const sectionTypeDefinitions = pgTable("section_type_definitions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  typeName: text("type_name").notNull().unique(), // e.g., 'skills', 'projects', 'experience'
+  displayName: text("display_name").notNull(), // e.g., 'Skills & Technologies', 'Project Gallery'
+  description: text("description"), // Description of what this section type is for
+  defaultLayoutConfig: json("default_layout_config"), // Default layout: { columns: 2, style: 'grid', responsive: true }
+  allowedContentTypes: json("allowed_content_types").notNull(), // Array of content element types allowed in this section
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+// Content element type definitions - defines available content element types and their metadata schemas
+export const contentElementTypeDefinitions = pgTable("content_element_type_definitions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  typeName: text("type_name").notNull().unique(), // e.g., 'skill_card', 'project_card', 'experience_entry'
+  displayName: text("display_name").notNull(), // e.g., 'Skill Card', 'Project Card', 'Experience Entry'
+  description: text("description"), // Description of what this content type is for
+  metadataSchema: json("metadata_schema"), // JSON schema defining required/optional metadata fields
+  defaultValues: json("default_values"), // Default values for new instances of this type
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow()
@@ -98,11 +125,25 @@ export const insertDropdownOptionSchema = createInsertSchema(dropdownOptions).om
   updatedAt: true
 });
 
+export const insertSectionTypeDefinitionSchema = createInsertSchema(sectionTypeDefinitions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export const insertContentElementTypeDefinitionSchema = createInsertSchema(contentElementTypeDefinitions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
 export const updatePageSchema = insertPageSchema.partial();
 export const updatePageSectionSchema = insertPageSectionSchema.partial().omit({ pageId: true });
 export const updateContentElementSchema = insertContentElementSchema.partial().omit({ sectionId: true });
 export const updateSiteSettingSchema = insertSiteSettingSchema.partial().omit({ key: true });
 export const updateDropdownOptionSchema = insertDropdownOptionSchema.partial().omit({ fieldName: true });
+export const updateSectionTypeDefinitionSchema = insertSectionTypeDefinitionSchema.partial().omit({ typeName: true });
+export const updateContentElementTypeDefinitionSchema = insertContentElementTypeDefinitionSchema.partial().omit({ typeName: true });
 
 // Type definitions
 export type User = typeof users.$inferSelect;
@@ -128,6 +169,79 @@ export type DropdownOption = typeof dropdownOptions.$inferSelect;
 export type InsertDropdownOption = z.infer<typeof insertDropdownOptionSchema>;
 export type UpdateDropdownOption = z.infer<typeof updateDropdownOptionSchema>;
 
+export type SectionTypeDefinition = typeof sectionTypeDefinitions.$inferSelect;
+export type InsertSectionTypeDefinition = z.infer<typeof insertSectionTypeDefinitionSchema>;
+export type UpdateSectionTypeDefinition = z.infer<typeof updateSectionTypeDefinitionSchema>;
+
+export type ContentElementTypeDefinition = typeof contentElementTypeDefinitions.$inferSelect;
+export type InsertContentElementTypeDefinition = z.infer<typeof insertContentElementTypeDefinitionSchema>;
+export type UpdateContentElementTypeDefinition = z.infer<typeof updateContentElementTypeDefinitionSchema>;
+
+// Layout Configuration Types
+export interface LayoutConfig {
+  columns?: number; // Number of columns (1, 2, 3)
+  style?: 'grid' | 'list' | 'cards' | 'masonry'; // Layout style
+  gap?: 'sm' | 'md' | 'lg'; // Spacing between items
+  responsive?: boolean; // Whether to adjust columns on mobile
+  useNetflixHover?: boolean; // Whether to use Netflix-style hover effects
+}
+
+// Content Metadata Types for different content element types
+export interface SkillCardMetadata {
+  level?: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  category?: string;
+}
+
+export interface ProjectMetadata {
+  technologies?: string[];
+  links?: {
+    demo?: string;
+    github?: string;
+    live?: string;
+  };
+  status?: 'active' | 'completed' | 'archived';
+  featured?: boolean;
+}
+
+export interface ExperienceMetadata {
+  company: string;
+  period: string;
+  location?: string;
+  type?: 'full-time' | 'part-time' | 'contract' | 'internship';
+}
+
+export interface PublicationMetadata {
+  authors: string;
+  venue: string;
+  year?: number;
+  doiUrl?: string;
+  citation?: string;
+  type?: 'journal' | 'conference' | 'workshop' | 'preprint';
+}
+
+export interface ResearchProjectMetadata {
+  status?: string; // Uses dropdown options
+  tags?: string[];
+  startDate?: string;
+  endDate?: string;
+  collaborators?: string[];
+}
+
+export interface ResearchInterestMetadata {
+  keywords?: string[];
+  relatedProjects?: string[];
+}
+
+// Union type for all possible metadata
+export type ContentMetadata = 
+  | SkillCardMetadata 
+  | ProjectMetadata 
+  | ExperienceMetadata 
+  | PublicationMetadata 
+  | ResearchProjectMetadata 
+  | ResearchInterestMetadata 
+  | Record<string, any>; // Fallback for other types
+
 // Complex types for nested data
 export type PageWithSections = Page & {
   sections: (PageSection & {
@@ -137,4 +251,12 @@ export type PageWithSections = Page & {
 
 export type SectionWithElements = PageSection & {
   elements: ContentElement[];
+};
+
+export type PageSectionWithLayout = PageSection & {
+  layoutConfig?: LayoutConfig;
+};
+
+export type ContentElementWithTypedMetadata<T extends ContentMetadata = ContentMetadata> = Omit<ContentElement, 'metadata'> & {
+  metadata?: T;
 };
