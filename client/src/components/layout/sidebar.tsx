@@ -16,6 +16,7 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
   const [location, navigate] = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   const navItems = [
     { label: 'About', href: '/about' },
@@ -94,16 +95,25 @@ export function Sidebar({ className }: SidebarProps) {
 
           {/* Navigation */}
           <nav className="space-y-6 relative overflow-visible" data-testid="nav-main">
-            {navItems.map((item) => (
-              <div key={item.href} className="nav-item-container relative">
+            {navItems.map((item) => {
+              const isActive = location === item.href;
+              const isHovered = hoveredItem === item.href;
+              const shouldExtend = isActive || isHovered;
+              
+              return (
+              <div 
+                key={item.href} 
+                className="nav-item-container relative"
+                onMouseEnter={() => setHoveredItem(item.href)}
+                onMouseLeave={() => setHoveredItem(null)}
+              >
                 <motion.button
                   onClick={() => handleNavClick(item.href)}
                   className={cn(
                     "nav-link block text-lg font-medium hover:text-primary transition-colors w-full text-left relative z-10",
-                    location === item.href && "active text-primary"
+                    isActive && "active text-primary"
                   )}
-                  whileHover={{ x: 32 }}
-                  animate={{ x: location === item.href ? 32 : 0 }}
+                  animate={{ x: shouldExtend ? 32 : 0 }}
                   transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
                   data-testid={`link-${item.label.toLowerCase()}`}
                 >
@@ -111,13 +121,12 @@ export function Sidebar({ className }: SidebarProps) {
                 </motion.button>
                 <motion.div 
                   className="nav-line absolute left-[-24px] top-1/2 h-0.5 transform -translate-y-1/2"
-                  initial={{ width: location === item.href ? 48 : 16 }}
-                  animate={{ width: location === item.href ? 48 : 16 }}
-                  whileHover={{ width: 48 }}
+                  animate={{ width: shouldExtend ? 48 : 16 }}
                   transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
                 />
               </div>
-            ))}
+            );
+            })}
           </nav>
         </div>
 
