@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, CheckCircle, AlertCircle, Copy, Trash2, GripVertical } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle, Copy, Trash2, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Admin() {
@@ -452,6 +452,151 @@ export default function Admin() {
     }
   };
 
+  const duplicateElement = async (elementId: string, targetSectionId: string) => {
+    try {
+      const response = await fetch(`/api/admin/elements/${elementId}/duplicate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          targetSectionId
+        })
+      });
+      
+      if (response.ok) {
+        setSuccessMessage('Element duplicated successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        if (selectedPage) {
+          loadPageContent(selectedPage);
+        }
+      } else {
+        setErrorMessage('Failed to duplicate element. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to duplicate element:', err);
+      setErrorMessage('Failed to duplicate element. Please try again.');
+    }
+  };
+
+  // Reordering functions
+  const reorderSections = async (sectionOrders: Array<{id: string, order: number}>) => {
+    try {
+      const response = await fetch('/api/admin/sections/reorder', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sectionOrders
+        })
+      });
+      
+      if (response.ok) {
+        setSuccessMessage('Sections reordered successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        if (selectedPage) {
+          loadPageContent(selectedPage);
+        }
+      } else {
+        setErrorMessage('Failed to reorder sections. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to reorder sections:', err);
+      setErrorMessage('Failed to reorder sections. Please try again.');
+    }
+  };
+
+  const reorderElements = async (elementOrders: Array<{id: string, order: number}>) => {
+    try {
+      const response = await fetch('/api/admin/elements/reorder', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          elementOrders
+        })
+      });
+      
+      if (response.ok) {
+        setSuccessMessage('Elements reordered successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        if (selectedPage) {
+          loadPageContent(selectedPage);
+        }
+      } else {
+        setErrorMessage('Failed to reorder elements. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to reorder elements:', err);
+      setErrorMessage('Failed to reorder elements. Please try again.');
+    }
+  };
+
+  const moveSectionUp = (sectionIndex: number) => {
+    if (!pageContent || sectionIndex <= 0) return;
+    
+    const currentSection = pageContent.sections[sectionIndex];
+    const previousSection = pageContent.sections[sectionIndex - 1];
+    
+    const sectionOrders = [
+      { id: currentSection.id, order: previousSection.order || 0 },
+      { id: previousSection.id, order: currentSection.order || 0 }
+    ];
+    
+    reorderSections(sectionOrders);
+  };
+
+  const moveSectionDown = (sectionIndex: number) => {
+    if (!pageContent || sectionIndex >= pageContent.sections.length - 1) return;
+    
+    const currentSection = pageContent.sections[sectionIndex];
+    const nextSection = pageContent.sections[sectionIndex + 1];
+    
+    const sectionOrders = [
+      { id: currentSection.id, order: nextSection.order || 0 },
+      { id: nextSection.id, order: currentSection.order || 0 }
+    ];
+    
+    reorderSections(sectionOrders);
+  };
+
+  const moveElementUp = (sectionIndex: number, elementIndex: number) => {
+    if (!pageContent || elementIndex <= 0) return;
+    
+    const section = pageContent.sections[sectionIndex];
+    const currentElement = section.elements[elementIndex];
+    const previousElement = section.elements[elementIndex - 1];
+    
+    const elementOrders = [
+      { id: currentElement.id, order: previousElement.order || 0 },
+      { id: previousElement.id, order: currentElement.order || 0 }
+    ];
+    
+    reorderElements(elementOrders);
+  };
+
+  const moveElementDown = (sectionIndex: number, elementIndex: number) => {
+    if (!pageContent) return;
+    
+    const section = pageContent.sections[sectionIndex];
+    if (elementIndex >= section.elements.length - 1) return;
+    
+    const currentElement = section.elements[elementIndex];
+    const nextElement = section.elements[elementIndex + 1];
+    
+    const elementOrders = [
+      { id: currentElement.id, order: nextElement.order || 0 },
+      { id: nextElement.id, order: currentElement.order || 0 }
+    ];
+    
+    reorderElements(elementOrders);
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       loadResearchStatusOptions();
@@ -878,46 +1023,205 @@ export default function Admin() {
             </div>
           ) : pageContent && pageContent.sections ? (
             <div className="flex flex-col gap-6">
-              {pageContent.sections.map((section: any) => (
+              {/* Bulk Operations Bar */}
+              {(selectedSections.size > 0 || selectedElements.size > 0) && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                        {selectedSections.size > 0 && `${selectedSections.size} section${selectedSections.size > 1 ? 's' : ''} selected`}
+                        {selectedSections.size > 0 && selectedElements.size > 0 && ', '}
+                        {selectedElements.size > 0 && `${selectedElements.size} element${selectedElements.size > 1 ? 's' : ''} selected`}
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      {selectedSections.size > 0 && (
+                        <Button
+                          onClick={bulkDeleteSections}
+                          disabled={bulkOperationLoading}
+                          variant="destructive"
+                          size="sm"
+                          data-testid="button-bulk-delete-sections"
+                        >
+                          {bulkOperationLoading ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="mr-2 h-4 w-4" />
+                          )}
+                          Delete Sections
+                        </Button>
+                      )}
+                      {selectedElements.size > 0 && (
+                        <Button
+                          onClick={bulkDeleteElements}
+                          disabled={bulkOperationLoading}
+                          variant="destructive"
+                          size="sm"
+                          data-testid="button-bulk-delete-elements"
+                        >
+                          {bulkOperationLoading ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="mr-2 h-4 w-4" />
+                          )}
+                          Delete Elements
+                        </Button>
+                      )}
+                      <Button
+                        onClick={() => {
+                          setSelectedSections(new Set());
+                          setSelectedElements(new Set());
+                        }}
+                        variant="secondary"
+                        size="sm"
+                        data-testid="button-clear-selection"
+                      >
+                        Clear Selection
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {pageContent.sections.map((section: any, sectionIndex: number) => (
                 <div
                   key={section.id}
-                  className="bg-muted p-4 sm:p-6 rounded border border-border"
+                  className={`bg-muted p-4 sm:p-6 rounded border-2 ${
+                    selectedSections.has(section.id) ? 'border-blue-500' : 'border-border'
+                  }`}
                 >
-                  <h3 className="m-0 mb-4 sm:mb-6 text-lg sm:text-xl font-semibold text-foreground">
-                    {section.title || `${section.type} Section`}
-                  </h3>
+                  <div className="flex items-start gap-3 mb-4">
+                    <Checkbox
+                      checked={selectedSections.has(section.id)}
+                      onCheckedChange={(checked) => {
+                        const newSelection = new Set(selectedSections);
+                        if (checked) {
+                          newSelection.add(section.id);
+                        } else {
+                          newSelection.delete(section.id);
+                        }
+                        setSelectedSections(newSelection);
+                      }}
+                      data-testid={`checkbox-section-${section.id}`}
+                    />
+                    <div className="flex-1">
+                      <h3 className="m-0 mb-2 text-lg sm:text-xl font-semibold text-foreground">
+                        {section.title || `${section.type} Section`}
+                      </h3>
+                    </div>
+                    <div className="flex gap-1">
+                      <div className="flex flex-col gap-1">
+                        <Button
+                          onClick={() => moveSectionUp(sectionIndex)}
+                          disabled={sectionIndex === 0}
+                          variant="ghost"
+                          size="sm"
+                          data-testid={`button-move-section-up-${section.id}`}
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          onClick={() => moveSectionDown(sectionIndex)}
+                          disabled={sectionIndex === pageContent.sections.length - 1}
+                          variant="ghost"
+                          size="sm"
+                          data-testid={`button-move-section-down-${section.id}`}
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <Button
+                        onClick={() => duplicateSection(section.id, pageContent.id)}
+                        variant="secondary"
+                        size="sm"
+                        data-testid={`button-duplicate-section-${section.id}`}
+                      >
+                        <Copy className="mr-2 h-4 w-4" />
+                        Duplicate
+                      </Button>
+                    </div>
+                  </div>
                   
                   <div className="flex flex-col gap-6">
-                    {section.elements.map((element: any) => (
+                    {section.elements.map((element: any, elementIndex: number) => (
                       <div
                         key={element.id}
-                        className="bg-card p-4 sm:p-6 rounded border border-border"
+                        className={`bg-card p-4 sm:p-6 rounded border-2 ${
+                          selectedElements.has(element.id) ? 'border-blue-500' : 'border-border'
+                        }`}
                       >
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-0 mb-4">
-                          <div className="flex-1">
-                            <span className="px-1.5 py-0.5 bg-muted rounded text-sm mr-2">
-                              {element.type}
-                            </span>
-                            {element.title && (
-                              <span className="text-sm font-medium">
-                                {element.title}
-                              </span>
-                            )}
-                          </div>
-                          <Button
-                            onClick={() => {
-                              setEditingElement(element.id);
-                              setEditContent(element.content || '');
-                              setEditTitle(element.title || '');
-                              setEditMetadata(element.metadata || {});
+                        <div className="flex items-start gap-3 mb-4">
+                          <Checkbox
+                            checked={selectedElements.has(element.id)}
+                            onCheckedChange={(checked) => {
+                              const newSelection = new Set(selectedElements);
+                              if (checked) {
+                                newSelection.add(element.id);
+                              } else {
+                                newSelection.delete(element.id);
+                              }
+                              setSelectedElements(newSelection);
                             }}
-                            variant="secondary"
-                            size="sm"
-                            className="w-full sm:w-auto"
-                            aria-label={`Edit ${element.type}`}
-                          >
-                            Edit
-                          </Button>
+                            data-testid={`checkbox-element-${element.id}`}
+                          />
+                          <div className="flex-1 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-0">
+                            <div className="flex-1">
+                              <span className="px-1.5 py-0.5 bg-muted rounded text-sm mr-2">
+                                {element.type}
+                              </span>
+                              {element.title && (
+                                <span className="text-sm font-medium">
+                                  {element.title}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex gap-1">
+                              <div className="flex flex-col gap-1">
+                                <Button
+                                  onClick={() => moveElementUp(sectionIndex, elementIndex)}
+                                  disabled={elementIndex === 0}
+                                  variant="ghost"
+                                  size="sm"
+                                  data-testid={`button-move-element-up-${element.id}`}
+                                >
+                                  <ChevronUp className="h-3 w-3" />
+                                </Button>
+                                <Button
+                                  onClick={() => moveElementDown(sectionIndex, elementIndex)}
+                                  disabled={elementIndex === section.elements.length - 1}
+                                  variant="ghost"
+                                  size="sm"
+                                  data-testid={`button-move-element-down-${element.id}`}
+                                >
+                                  <ChevronDown className="h-3 w-3" />
+                                </Button>
+                              </div>
+                              <Button
+                                onClick={() => {
+                                  setEditingElement(element.id);
+                                  setEditContent(element.content || '');
+                                  setEditTitle(element.title || '');
+                                  setEditMetadata(element.metadata || {});
+                                }}
+                                variant="secondary"
+                                size="sm"
+                                className="w-full sm:w-auto"
+                                aria-label={`Edit ${element.type}`}
+                                data-testid={`button-edit-element-${element.id}`}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                onClick={() => duplicateElement(element.id, section.id)}
+                                variant="secondary"
+                                size="sm"
+                                data-testid={`button-duplicate-element-${element.id}`}
+                              >
+                                <Copy className="mr-1 h-3 w-3" />
+                                Duplicate
+                              </Button>
+                            </div>
+                          </div>
                         </div>
 
                         {editingElement === element.id ? (
