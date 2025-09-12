@@ -17,7 +17,14 @@ import {
   type UpdateSiteSetting,
   type DropdownOption,
   type InsertDropdownOption,
-  type UpdateDropdownOption
+  type UpdateDropdownOption,
+  type SectionTypeDefinition,
+  type InsertSectionTypeDefinition,
+  type UpdateSectionTypeDefinition,
+  type ContentElementTypeDefinition,
+  type InsertContentElementTypeDefinition,
+  type UpdateContentElementTypeDefinition,
+  type LayoutConfig
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -63,6 +70,33 @@ export interface IStorage {
   createDropdownOption(option: InsertDropdownOption): Promise<DropdownOption>;
   updateDropdownOption(id: string, option: UpdateDropdownOption): Promise<DropdownOption>;
   deleteDropdownOption(id: string): Promise<void>;
+
+  // Section Type Definitions methods
+  getAllSectionTypeDefinitions(): Promise<SectionTypeDefinition[]>;
+  getActiveSectionTypeDefinitions(): Promise<SectionTypeDefinition[]>;
+  getSectionTypeDefinition(id: string): Promise<SectionTypeDefinition | undefined>;
+  getSectionTypeDefinitionByName(typeName: string): Promise<SectionTypeDefinition | undefined>;
+  createSectionTypeDefinition(definition: InsertSectionTypeDefinition): Promise<SectionTypeDefinition>;
+  updateSectionTypeDefinition(id: string, definition: UpdateSectionTypeDefinition): Promise<SectionTypeDefinition>;
+  deleteSectionTypeDefinition(id: string): Promise<void>;
+
+  // Content Element Type Definitions methods
+  getAllContentElementTypeDefinitions(): Promise<ContentElementTypeDefinition[]>;
+  getActiveContentElementTypeDefinitions(): Promise<ContentElementTypeDefinition[]>;
+  getContentElementTypeDefinition(id: string): Promise<ContentElementTypeDefinition | undefined>;
+  getContentElementTypeDefinitionByName(typeName: string): Promise<ContentElementTypeDefinition | undefined>;
+  getContentElementTypeDefinitionsForSection(sectionTypeName: string): Promise<ContentElementTypeDefinition[]>;
+  createContentElementTypeDefinition(definition: InsertContentElementTypeDefinition): Promise<ContentElementTypeDefinition>;
+  updateContentElementTypeDefinition(id: string, definition: UpdateContentElementTypeDefinition): Promise<ContentElementTypeDefinition>;
+  deleteContentElementTypeDefinition(id: string): Promise<void>;
+
+  // Bulk operations and reordering
+  reorderElements(sectionId: string, elementIds: string[]): Promise<void>;
+  reorderSections(pageId: string, sectionIds: string[]): Promise<void>;
+  bulkDeleteElements(elementIds: string[]): Promise<void>;
+  bulkDeleteSections(sectionIds: string[]): Promise<void>;
+  duplicateElement(elementId: string): Promise<ContentElement>;
+  duplicateSection(sectionId: string, targetPageId?: string): Promise<PageSection>;
 }
 
 export class MemStorage implements IStorage {
@@ -72,6 +106,8 @@ export class MemStorage implements IStorage {
   private contentElements: Map<string, ContentElement>;
   private siteSettings: Map<string, SiteSetting>;
   private dropdownOptions: Map<string, DropdownOption>;
+  private sectionTypeDefinitions: Map<string, SectionTypeDefinition>;
+  private contentElementTypeDefinitions: Map<string, ContentElementTypeDefinition>;
 
   constructor() {
     this.users = new Map();
@@ -80,6 +116,8 @@ export class MemStorage implements IStorage {
     this.contentElements = new Map();
     this.siteSettings = new Map();
     this.dropdownOptions = new Map();
+    this.sectionTypeDefinitions = new Map();
+    this.contentElementTypeDefinitions = new Map();
   }
 
   // User methods
@@ -186,6 +224,7 @@ export class MemStorage implements IStorage {
       pageId: insertSection.pageId,
       type: insertSection.type,
       title: insertSection.title ?? null,
+      layoutConfig: insertSection.layoutConfig ?? null,
       order: insertSection.order ?? 0,
       isPublished: insertSection.isPublished ?? true,
       createdAt: now, 
@@ -359,6 +398,234 @@ export class MemStorage implements IStorage {
 
   async deleteDropdownOption(id: string): Promise<void> {
     this.dropdownOptions.delete(id);
+  }
+
+  // Section Type Definitions methods
+  async getAllSectionTypeDefinitions(): Promise<SectionTypeDefinition[]> {
+    return Array.from(this.sectionTypeDefinitions.values())
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  }
+
+  async getActiveSectionTypeDefinitions(): Promise<SectionTypeDefinition[]> {
+    return Array.from(this.sectionTypeDefinitions.values())
+      .filter(definition => definition.isActive)
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  }
+
+  async getSectionTypeDefinition(id: string): Promise<SectionTypeDefinition | undefined> {
+    return this.sectionTypeDefinitions.get(id);
+  }
+
+  async getSectionTypeDefinitionByName(typeName: string): Promise<SectionTypeDefinition | undefined> {
+    return Array.from(this.sectionTypeDefinitions.values())
+      .find(definition => definition.typeName === typeName);
+  }
+
+  async createSectionTypeDefinition(insertDefinition: InsertSectionTypeDefinition): Promise<SectionTypeDefinition> {
+    const id = randomUUID();
+    const now = new Date();
+    const definition: SectionTypeDefinition = {
+      id,
+      typeName: insertDefinition.typeName,
+      displayName: insertDefinition.displayName,
+      description: insertDefinition.description ?? null,
+      defaultLayoutConfig: insertDefinition.defaultLayoutConfig ?? null,
+      allowedContentTypes: insertDefinition.allowedContentTypes,
+      isActive: insertDefinition.isActive ?? true,
+      createdAt: now,
+      updatedAt: now
+    };
+    this.sectionTypeDefinitions.set(id, definition);
+    return definition;
+  }
+
+  async updateSectionTypeDefinition(id: string, updateDefinition: UpdateSectionTypeDefinition): Promise<SectionTypeDefinition> {
+    const existing = this.sectionTypeDefinitions.get(id);
+    if (!existing) throw new Error('Section type definition not found');
+    
+    const updated: SectionTypeDefinition = {
+      ...existing,
+      ...updateDefinition,
+      updatedAt: new Date()
+    };
+    this.sectionTypeDefinitions.set(id, updated);
+    return updated;
+  }
+
+  async deleteSectionTypeDefinition(id: string): Promise<void> {
+    this.sectionTypeDefinitions.delete(id);
+  }
+
+  // Content Element Type Definitions methods
+  async getAllContentElementTypeDefinitions(): Promise<ContentElementTypeDefinition[]> {
+    return Array.from(this.contentElementTypeDefinitions.values())
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  }
+
+  async getActiveContentElementTypeDefinitions(): Promise<ContentElementTypeDefinition[]> {
+    return Array.from(this.contentElementTypeDefinitions.values())
+      .filter(definition => definition.isActive)
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  }
+
+  async getContentElementTypeDefinition(id: string): Promise<ContentElementTypeDefinition | undefined> {
+    return this.contentElementTypeDefinitions.get(id);
+  }
+
+  async getContentElementTypeDefinitionByName(typeName: string): Promise<ContentElementTypeDefinition | undefined> {
+    return Array.from(this.contentElementTypeDefinitions.values())
+      .find(definition => definition.typeName === typeName);
+  }
+
+  async getContentElementTypeDefinitionsForSection(sectionTypeName: string): Promise<ContentElementTypeDefinition[]> {
+    const sectionTypeDef = await this.getSectionTypeDefinitionByName(sectionTypeName);
+    if (!sectionTypeDef || !sectionTypeDef.allowedContentTypes) {
+      return [];
+    }
+
+    const allowedTypes = sectionTypeDef.allowedContentTypes as string[];
+    return Array.from(this.contentElementTypeDefinitions.values())
+      .filter(definition => definition.isActive && allowedTypes.includes(definition.typeName))
+      .sort((a, b) => a.displayName.localeCompare(b.displayName));
+  }
+
+  async createContentElementTypeDefinition(insertDefinition: InsertContentElementTypeDefinition): Promise<ContentElementTypeDefinition> {
+    const id = randomUUID();
+    const now = new Date();
+    const definition: ContentElementTypeDefinition = {
+      id,
+      typeName: insertDefinition.typeName,
+      displayName: insertDefinition.displayName,
+      description: insertDefinition.description ?? null,
+      metadataSchema: insertDefinition.metadataSchema ?? null,
+      defaultValues: insertDefinition.defaultValues ?? null,
+      isActive: insertDefinition.isActive ?? true,
+      createdAt: now,
+      updatedAt: now
+    };
+    this.contentElementTypeDefinitions.set(id, definition);
+    return definition;
+  }
+
+  async updateContentElementTypeDefinition(id: string, updateDefinition: UpdateContentElementTypeDefinition): Promise<ContentElementTypeDefinition> {
+    const existing = this.contentElementTypeDefinitions.get(id);
+    if (!existing) throw new Error('Content element type definition not found');
+    
+    const updated: ContentElementTypeDefinition = {
+      ...existing,
+      ...updateDefinition,
+      updatedAt: new Date()
+    };
+    this.contentElementTypeDefinitions.set(id, updated);
+    return updated;
+  }
+
+  async deleteContentElementTypeDefinition(id: string): Promise<void> {
+    this.contentElementTypeDefinitions.delete(id);
+  }
+
+  // Bulk operations and reordering
+  async reorderElements(sectionId: string, elementIds: string[]): Promise<void> {
+    // Update order for each element
+    for (let i = 0; i < elementIds.length; i++) {
+      const element = this.contentElements.get(elementIds[i]);
+      if (element && element.sectionId === sectionId) {
+        const updated: ContentElement = {
+          ...element,
+          order: i,
+          updatedAt: new Date()
+        };
+        this.contentElements.set(elementIds[i], updated);
+      }
+    }
+  }
+
+  async reorderSections(pageId: string, sectionIds: string[]): Promise<void> {
+    // Update order for each section
+    for (let i = 0; i < sectionIds.length; i++) {
+      const section = this.pageSections.get(sectionIds[i]);
+      if (section && section.pageId === pageId) {
+        const updated: PageSection = {
+          ...section,
+          order: i,
+          updatedAt: new Date()
+        };
+        this.pageSections.set(sectionIds[i], updated);
+      }
+    }
+  }
+
+  async bulkDeleteElements(elementIds: string[]): Promise<void> {
+    for (const elementId of elementIds) {
+      this.contentElements.delete(elementId);
+    }
+  }
+
+  async bulkDeleteSections(sectionIds: string[]): Promise<void> {
+    for (const sectionId of sectionIds) {
+      await this.deleteSection(sectionId); // This also deletes associated elements
+    }
+  }
+
+  async duplicateElement(elementId: string): Promise<ContentElement> {
+    const original = this.contentElements.get(elementId);
+    if (!original) throw new Error('Element not found');
+
+    // Find the highest order in the same section
+    const sectionElements = await this.getElementsBySectionId(original.sectionId);
+    const maxOrder = Math.max(...sectionElements.map(e => e.order ?? 0));
+
+    const duplicate: InsertContentElement = {
+      sectionId: original.sectionId,
+      type: original.type,
+      title: original.title ? `${original.title} (Copy)` : null,
+      content: original.content,
+      metadata: original.metadata as any,
+      order: maxOrder + 1,
+      isPublished: false // Mark as draft by default
+    };
+
+    return this.createElement(duplicate);
+  }
+
+  async duplicateSection(sectionId: string, targetPageId?: string): Promise<PageSection> {
+    const original = this.pageSections.get(sectionId);
+    if (!original) throw new Error('Section not found');
+
+    const pageId = targetPageId || original.pageId;
+    
+    // Find the highest order in the target page
+    const pageSections = await this.getSectionsByPageId(pageId);
+    const maxOrder = Math.max(...pageSections.map(s => s.order ?? 0));
+
+    // Duplicate the section
+    const duplicateSection: InsertPageSection = {
+      pageId,
+      type: original.type,
+      title: original.title ? `${original.title} (Copy)` : null,
+      layoutConfig: original.layoutConfig as any,
+      order: maxOrder + 1,
+      isPublished: false // Mark as draft by default
+    };
+
+    const newSection = await this.createSection(duplicateSection);
+
+    // Duplicate all elements in the section
+    const elements = await this.getElementsBySectionId(sectionId);
+    for (const element of elements) {
+      const duplicateElement: InsertContentElement = {
+        sectionId: newSection.id,
+        type: element.type,
+        title: element.title,
+        content: element.content,
+        metadata: element.metadata as any,
+        order: element.order ?? 0,
+        isPublished: false // Mark as draft by default
+      };
+      await this.createElement(duplicateElement);
+    }
+
+    return newSection;
   }
 }
 
