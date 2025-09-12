@@ -109,14 +109,12 @@ export function Sidebar({ className }: SidebarProps) {
                 >
                   {item.label}
                 </motion.button>
-                <div 
-                  className={cn(
-                    "nav-line absolute left-[-24px] top-1/2 h-0.5 transition-all duration-300 ease-out transform -translate-y-1/2",
-                    location === item.href ? "w-12" : "w-4"
-                  )}
-                  style={{
-                    width: location === item.href ? '48px' : '16px'
-                  }}
+                <motion.div 
+                  className="nav-line absolute left-[-24px] top-1/2 h-0.5 transform -translate-y-1/2"
+                  initial={{ width: location === item.href ? 48 : 16 }}
+                  animate={{ width: location === item.href ? 48 : 16 }}
+                  whileHover={{ width: 48 }}
+                  transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
                 />
               </div>
             ))}
