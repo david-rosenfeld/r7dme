@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Loader2, CheckCircle, AlertCircle, Copy, Trash2, GripVertical } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Admin() {
@@ -47,6 +48,34 @@ export default function Admin() {
   const [editDropdownValue, setEditDropdownValue] = useState<string>('');
   const [editDropdownLabel, setEditDropdownLabel] = useState<string>('');
   const [savingDropdownOption, setSavingDropdownOption] = useState<string | null>(null);
+  
+  // Content Types Management
+  const [sectionTypes, setSectionTypes] = useState<any[]>([]);
+  const [elementTypes, setElementTypes] = useState<any[]>([]);
+  const [loadingSectionTypes, setLoadingSectionTypes] = useState<boolean>(false);
+  const [loadingElementTypes, setLoadingElementTypes] = useState<boolean>(false);
+  const [editingSectionType, setEditingSectionType] = useState<string | null>(null);
+  const [editingElementType, setEditingElementType] = useState<string | null>(null);
+  const [savingSectionType, setSavingSectionType] = useState<string | null>(null);
+  const [savingElementType, setSavingElementType] = useState<string | null>(null);
+  
+  // New Section Type Form
+  const [newSectionTypeName, setNewSectionTypeName] = useState<string>('');
+  const [newSectionTypeDisplayName, setNewSectionTypeDisplayName] = useState<string>('');
+  const [newSectionTypeDescription, setNewSectionTypeDescription] = useState<string>('');
+  const [newSectionTypeLayoutConfig, setNewSectionTypeLayoutConfig] = useState<string>('{"columns": 1}');
+  
+  // New Element Type Form
+  const [newElementTypeName, setNewElementTypeName] = useState<string>('');
+  const [newElementTypeDisplayName, setNewElementTypeDisplayName] = useState<string>('');
+  const [newElementTypeDescription, setNewElementTypeDescription] = useState<string>('');
+  const [newElementTypeAllowedSections, setNewElementTypeAllowedSections] = useState<string[]>([]);
+  const [newElementTypeMetadataSchema, setNewElementTypeMetadataSchema] = useState<string>('{}');
+  
+  // Bulk Operations
+  const [selectedSections, setSelectedSections] = useState<Set<string>>(new Set());
+  const [selectedElements, setSelectedElements] = useState<Set<string>>(new Set());
+  const [bulkOperationLoading, setBulkOperationLoading] = useState<boolean>(false);
 
   const clearMessages = () => {
     setSuccessMessage('');
@@ -185,10 +214,250 @@ export default function Admin() {
     }
   };
 
+  // Load content type data
+  const loadSectionTypes = async () => {
+    setLoadingSectionTypes(true);
+    try {
+      const response = await fetch('/api/admin/section-types', {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      if (response.ok) {
+        const sectionTypesData = await response.json();
+        setSectionTypes(sectionTypesData);
+      } else {
+        setErrorMessage('Failed to load section types. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to load section types:', err);
+      setErrorMessage('Failed to load section types. Please try again.');
+    } finally {
+      setLoadingSectionTypes(false);
+    }
+  };
+
+  const loadElementTypes = async () => {
+    setLoadingElementTypes(true);
+    try {
+      const response = await fetch('/api/admin/element-types', {
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      if (response.ok) {
+        const elementTypesData = await response.json();
+        setElementTypes(elementTypesData);
+      } else {
+        setErrorMessage('Failed to load element types. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to load element types:', err);
+      setErrorMessage('Failed to load element types. Please try again.');
+    } finally {
+      setLoadingElementTypes(false);
+    }
+  };
+
+  // Section Type CRUD operations
+  const createSectionType = async () => {
+    setSavingSectionType('new');
+    try {
+      let layoutConfig;
+      try {
+        layoutConfig = JSON.parse(newSectionTypeLayoutConfig);
+      } catch (e) {
+        setErrorMessage('Invalid JSON in layout configuration.');
+        return;
+      }
+
+      const response = await fetch('/api/admin/section-types', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: newSectionTypeName,
+          displayName: newSectionTypeDisplayName,
+          description: newSectionTypeDescription,
+          layoutConfig,
+          isActive: true
+        })
+      });
+      
+      if (response.ok) {
+        setNewSectionTypeName('');
+        setNewSectionTypeDisplayName('');
+        setNewSectionTypeDescription('');
+        setNewSectionTypeLayoutConfig('{"columns": 1}');
+        setSuccessMessage('Section type created successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        loadSectionTypes();
+      } else {
+        const errorData = await response.json();
+        setErrorMessage(errorData.error || 'Failed to create section type. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to create section type:', err);
+      setErrorMessage('Failed to create section type. Please try again.');
+    } finally {
+      setSavingSectionType(null);
+    }
+  };
+
+  // Element Type CRUD operations
+  const createElementType = async () => {
+    setSavingElementType('new');
+    try {
+      let metadataSchema;
+      try {
+        metadataSchema = JSON.parse(newElementTypeMetadataSchema);
+      } catch (e) {
+        setErrorMessage('Invalid JSON in metadata schema.');
+        return;
+      }
+
+      const response = await fetch('/api/admin/element-types', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: newElementTypeName,
+          displayName: newElementTypeDisplayName,
+          description: newElementTypeDescription,
+          allowedSectionTypes: newElementTypeAllowedSections,
+          metadataSchema,
+          isActive: true
+        })
+      });
+      
+      if (response.ok) {
+        setNewElementTypeName('');
+        setNewElementTypeDisplayName('');
+        setNewElementTypeDescription('');
+        setNewElementTypeAllowedSections([]);
+        setNewElementTypeMetadataSchema('{}');
+        setSuccessMessage('Element type created successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        loadElementTypes();
+      } else {
+        const errorData = await response.json();
+        setErrorMessage(errorData.error || 'Failed to create element type. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to create element type:', err);
+      setErrorMessage('Failed to create element type. Please try again.');
+    } finally {
+      setSavingElementType(null);
+    }
+  };
+
+  // Bulk operations
+  const bulkDeleteSections = async () => {
+    if (selectedSections.size === 0) return;
+    
+    setBulkOperationLoading(true);
+    try {
+      const response = await fetch('/api/admin/sections/bulk', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sectionIds: Array.from(selectedSections)
+        })
+      });
+      
+      if (response.ok) {
+        setSelectedSections(new Set());
+        setSuccessMessage(`${selectedSections.size} sections deleted successfully!`);
+        setTimeout(() => setSuccessMessage(''), 3000);
+        if (selectedPage) {
+          loadPageContent(selectedPage);
+        }
+      } else {
+        setErrorMessage('Failed to delete sections. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to bulk delete sections:', err);
+      setErrorMessage('Failed to delete sections. Please try again.');
+    } finally {
+      setBulkOperationLoading(false);
+    }
+  };
+
+  const bulkDeleteElements = async () => {
+    if (selectedElements.size === 0) return;
+    
+    setBulkOperationLoading(true);
+    try {
+      const response = await fetch('/api/admin/elements/bulk', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          elementIds: Array.from(selectedElements)
+        })
+      });
+      
+      if (response.ok) {
+        setSelectedElements(new Set());
+        setSuccessMessage(`${selectedElements.size} elements deleted successfully!`);
+        setTimeout(() => setSuccessMessage(''), 3000);
+        if (selectedPage) {
+          loadPageContent(selectedPage);
+        }
+      } else {
+        setErrorMessage('Failed to delete elements. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to bulk delete elements:', err);
+      setErrorMessage('Failed to delete elements. Please try again.');
+    } finally {
+      setBulkOperationLoading(false);
+    }
+  };
+
+  const duplicateSection = async (sectionId: string, targetPageId: string) => {
+    try {
+      const response = await fetch(`/api/admin/sections/${sectionId}/duplicate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          targetPageId
+        })
+      });
+      
+      if (response.ok) {
+        setSuccessMessage('Section duplicated successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        if (selectedPage) {
+          loadPageContent(selectedPage);
+        }
+      } else {
+        setErrorMessage('Failed to duplicate section. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to duplicate section:', err);
+      setErrorMessage('Failed to duplicate section. Please try again.');
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       loadResearchStatusOptions();
       loadAllDropdownOptions();
+      loadSectionTypes();
+      loadElementTypes();
     }
   }, [isAuthenticated]);
 
@@ -499,9 +768,10 @@ export default function Admin() {
       
       {/* Tab Navigation */}
       <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); clearMessages(); }} className="w-full">
-        <TabsList className="grid w-full grid-cols-4 text-sm">
+        <TabsList className="grid w-full grid-cols-5 text-sm">
           <TabsTrigger value="pages" className="text-xs sm:text-sm">Pages</TabsTrigger>
           <TabsTrigger value="content" className="text-xs sm:text-sm">Edit Content</TabsTrigger>
+          <TabsTrigger value="content-types" className="text-xs sm:text-sm">Content Types</TabsTrigger>
           <TabsTrigger value="settings" className="text-xs sm:text-sm">Settings</TabsTrigger>
           <TabsTrigger value="dropdowns" className="text-xs sm:text-sm">Dropdown Options</TabsTrigger>
         </TabsList>
@@ -949,6 +1219,250 @@ export default function Admin() {
           ) : (
             <p className="text-muted-foreground">Select a page to edit its content.</p>
           )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="content-types">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-foreground">Content Type Management</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* Section Types Column */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold text-foreground">Section Types</h3>
+                  
+                  {/* Add New Section Type */}
+                  <div className="bg-muted p-6 rounded border border-border">
+                    <h4 className="text-lg font-semibold text-foreground mb-4">Add New Section Type</h4>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="new-section-type-name" className="text-sm font-medium">Name (identifier)</Label>
+                        <Input
+                          id="new-section-type-name"
+                          type="text"
+                          value={newSectionTypeName}
+                          onChange={(e) => setNewSectionTypeName(e.target.value)}
+                          placeholder="e.g., hero_section"
+                          data-testid="input-new-section-type-name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-section-type-display-name" className="text-sm font-medium">Display Name</Label>
+                        <Input
+                          id="new-section-type-display-name"
+                          type="text"
+                          value={newSectionTypeDisplayName}
+                          onChange={(e) => setNewSectionTypeDisplayName(e.target.value)}
+                          placeholder="e.g., Hero Section"
+                          data-testid="input-new-section-type-display-name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-section-type-description" className="text-sm font-medium">Description</Label>
+                        <Textarea
+                          id="new-section-type-description"
+                          value={newSectionTypeDescription}
+                          onChange={(e) => setNewSectionTypeDescription(e.target.value)}
+                          placeholder="Describe what this section type is used for..."
+                          data-testid="textarea-new-section-type-description"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-section-type-layout-config" className="text-sm font-medium">Layout Configuration (JSON)</Label>
+                        <Textarea
+                          id="new-section-type-layout-config"
+                          value={newSectionTypeLayoutConfig}
+                          onChange={(e) => setNewSectionTypeLayoutConfig(e.target.value)}
+                          placeholder='{"columns": 1, "spacing": "normal"}'
+                          data-testid="textarea-new-section-type-layout-config"
+                        />
+                      </div>
+                      <Button
+                        onClick={createSectionType}
+                        disabled={!newSectionTypeName || !newSectionTypeDisplayName || savingSectionType === 'new'}
+                        className="bg-green-600 hover:bg-green-700 w-full"
+                        data-testid="button-create-section-type"
+                      >
+                        {savingSectionType === 'new' ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Creating...
+                          </>
+                        ) : (
+                          'Add Section Type'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Existing Section Types */}
+                  {loadingSectionTypes ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                      Loading section types...
+                    </div>
+                  ) : sectionTypes.length > 0 ? (
+                    <div className="space-y-4">
+                      {sectionTypes.map((sectionType) => (
+                        <div key={sectionType.id} className="bg-card p-4 rounded border border-border">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="outline" className="text-xs">
+                                  {sectionType.name}
+                                </Badge>
+                                <span className="font-medium text-foreground">
+                                  {sectionType.displayName}
+                                </span>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-2">
+                                {sectionType.description}
+                              </p>
+                              <div className="text-xs text-muted-foreground">
+                                <span className={sectionType.isActive ? 'text-green-600' : 'text-red-600'}>
+                                  {sectionType.isActive ? 'Active' : 'Inactive'}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="secondary" size="sm" data-testid={`button-edit-section-type-${sectionType.id}`}>
+                                Edit
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      No section types found. Create one above to get started.
+                    </p>
+                  )}
+                </div>
+
+                {/* Element Types Column */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold text-foreground">Element Types</h3>
+                  
+                  {/* Add New Element Type */}
+                  <div className="bg-muted p-6 rounded border border-border">
+                    <h4 className="text-lg font-semibold text-foreground mb-4">Add New Element Type</h4>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="new-element-type-name" className="text-sm font-medium">Name (identifier)</Label>
+                        <Input
+                          id="new-element-type-name"
+                          type="text"
+                          value={newElementTypeName}
+                          onChange={(e) => setNewElementTypeName(e.target.value)}
+                          placeholder="e.g., text_block"
+                          data-testid="input-new-element-type-name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-element-type-display-name" className="text-sm font-medium">Display Name</Label>
+                        <Input
+                          id="new-element-type-display-name"
+                          type="text"
+                          value={newElementTypeDisplayName}
+                          onChange={(e) => setNewElementTypeDisplayName(e.target.value)}
+                          placeholder="e.g., Text Block"
+                          data-testid="input-new-element-type-display-name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-element-type-description" className="text-sm font-medium">Description</Label>
+                        <Textarea
+                          id="new-element-type-description"
+                          value={newElementTypeDescription}
+                          onChange={(e) => setNewElementTypeDescription(e.target.value)}
+                          placeholder="Describe what this element type is used for..."
+                          data-testid="textarea-new-element-type-description"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="new-element-type-metadata-schema" className="text-sm font-medium">Metadata Schema (JSON)</Label>
+                        <Textarea
+                          id="new-element-type-metadata-schema"
+                          value={newElementTypeMetadataSchema}
+                          onChange={(e) => setNewElementTypeMetadataSchema(e.target.value)}
+                          placeholder='{"type": "object", "properties": {}}'
+                          data-testid="textarea-new-element-type-metadata-schema"
+                        />
+                      </div>
+                      <Button
+                        onClick={createElementType}
+                        disabled={!newElementTypeName || !newElementTypeDisplayName || savingElementType === 'new'}
+                        className="bg-green-600 hover:bg-green-700 w-full"
+                        data-testid="button-create-element-type"
+                      >
+                        {savingElementType === 'new' ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Creating...
+                          </>
+                        ) : (
+                          'Add Element Type'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Existing Element Types */}
+                  {loadingElementTypes ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin mr-2" />
+                      Loading element types...
+                    </div>
+                  ) : elementTypes.length > 0 ? (
+                    <div className="space-y-4">
+                      {elementTypes.map((elementType) => (
+                        <div key={elementType.id} className="bg-card p-4 rounded border border-border">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant="outline" className="text-xs">
+                                  {elementType.name}
+                                </Badge>
+                                <span className="font-medium text-foreground">
+                                  {elementType.displayName}
+                                </span>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-2">
+                                {elementType.description}
+                              </p>
+                              <div className="text-xs text-muted-foreground">
+                                <span className={elementType.isActive ? 'text-green-600' : 'text-red-600'}>
+                                  {elementType.isActive ? 'Active' : 'Inactive'}
+                                </span>
+                                {elementType.allowedSectionTypes && elementType.allowedSectionTypes.length > 0 && (
+                                  <>
+                                    <span> • Allowed in: </span>
+                                    <span>{elementType.allowedSectionTypes.join(', ')}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="secondary" size="sm" data-testid={`button-edit-element-type-${elementType.id}`}>
+                                Edit
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      No element types found. Create one above to get started.
+                    </p>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
