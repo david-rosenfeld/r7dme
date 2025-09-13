@@ -1276,6 +1276,19 @@ export default function Admin() {
                   </div>
                   
                   <div className="flex flex-col gap-6">
+                    {/* Add Element Button */}
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={() => createNewElement(section.id)}
+                        variant="outline"
+                        size="sm"
+                        data-testid={`button-create-element-${section.id}`}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Element
+                      </Button>
+                    </div>
+
                     {section.elements.map((element: any, elementIndex: number) => (
                       <div
                         key={element.id}
