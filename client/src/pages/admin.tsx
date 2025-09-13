@@ -459,10 +459,7 @@ export default function Admin() {
         headers: {
           'Authorization': `Bearer ${authToken}`,
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          targetSectionId
-        })
+        }
       });
       
       if (response.ok) {

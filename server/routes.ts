@@ -607,10 +607,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (sectionOrders.length === 0) {
         return res.status(200).json({ message: "No sections to reorder" });
       }
+
+      // Group sections by page and reorder each page
+      const pageGroups = new Map<string, Array<{id: string, order: number}>>();
       
-      await storage.reorderSections(sectionOrders);
+      for (const sectionOrder of sectionOrders) {
+        const section = await storage.getSection(sectionOrder.id);
+        if (section) {
+          if (!pageGroups.has(section.pageId)) {
+            pageGroups.set(section.pageId, []);
+          }
+          pageGroups.get(section.pageId)!.push(sectionOrder);
+        }
+      }
+
+      // For each page, get all sections and reorder them
+      for (const [pageId, sectionsToUpdate] of Array.from(pageGroups)) {
+        const allSections = await storage.getSectionsByPageId(pageId);
+        
+        // Create a map for new orders
+        const orderMap = new Map<string, number>();
+        for (const sectionOrder of sectionsToUpdate) {
+          orderMap.set(sectionOrder.id, sectionOrder.order);
+        }
+        
+        // Sort all sections by their new or existing order
+        const sortedSections = allSections.sort((a: any, b: any) => {
+          const orderA = orderMap.has(a.id) ? orderMap.get(a.id)! : a.order || 0;
+          const orderB = orderMap.has(b.id) ? orderMap.get(b.id)! : b.order || 0;
+          return orderA - orderB;
+        });
+        
+        // Get the section IDs in the new order
+        const sectionIds = sortedSections.map((section: any) => section.id);
+        
+        await storage.reorderSections(pageId, sectionIds);
+      }
+      
       res.status(204).send();
     } catch (error) {
+      console.error('Reorder sections error:', error);
       res.status(500).json({ error: "Failed to reorder sections" });
     }
   });
@@ -626,10 +662,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (elementOrders.length === 0) {
         return res.status(200).json({ message: "No elements to reorder" });
       }
+
+      // Group elements by section and reorder each section
+      const sectionGroups = new Map<string, Array<{id: string, order: number}>>();
       
-      await storage.reorderElements(elementOrders);
+      for (const elementOrder of elementOrders) {
+        const element = await storage.getElement(elementOrder.id);
+        if (element) {
+          if (!sectionGroups.has(element.sectionId)) {
+            sectionGroups.set(element.sectionId, []);
+          }
+          sectionGroups.get(element.sectionId)!.push(elementOrder);
+        }
+      }
+
+      // For each section, get all elements and reorder them
+      for (const [sectionId, elementsToUpdate] of Array.from(sectionGroups)) {
+        const allElements = await storage.getElementsBySectionId(sectionId);
+        
+        // Create a map for new orders
+        const orderMap = new Map<string, number>();
+        for (const elementOrder of elementsToUpdate) {
+          orderMap.set(elementOrder.id, elementOrder.order);
+        }
+        
+        // Sort all elements by their new or existing order
+        const sortedElements = allElements.sort((a: any, b: any) => {
+          const orderA = orderMap.has(a.id) ? orderMap.get(a.id)! : a.order || 0;
+          const orderB = orderMap.has(b.id) ? orderMap.get(b.id)! : b.order || 0;
+          return orderA - orderB;
+        });
+        
+        // Get the element IDs in the new order
+        const elementIds = sortedElements.map((el: any) => el.id);
+        
+        await storage.reorderElements(sectionId, elementIds);
+      }
+      
       res.status(204).send();
     } catch (error) {
+      console.error('Reorder elements error:', error);
       res.status(500).json({ error: "Failed to reorder elements" });
     }
   });
@@ -657,16 +729,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/admin/elements/:id/duplicate", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
-      const { targetSectionId } = req.body;
       
-      if (!targetSectionId) {
-        return res.status(400).json({ error: "targetSectionId is required" });
-      }
-      
-      const duplicatedElement = await storage.duplicateElement(id, targetSectionId);
+      const duplicatedElement = await storage.duplicateElement(id);
       res.status(201).json(duplicatedElement);
     } catch (error: any) {
-      if (error.message === 'Content element not found') {
+      if (error.message === 'Element not found') {
         return res.status(404).json({ error: "Element not found" });
       }
       res.status(500).json({ error: "Failed to duplicate element" });
