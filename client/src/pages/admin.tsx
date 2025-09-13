@@ -610,7 +610,7 @@ export default function Admin() {
           type: 'content',
           title: 'New Section',
           content: 'New section content',
-          isPublished: false
+          isPublished: true
         })
       });
       
@@ -664,7 +664,7 @@ export default function Admin() {
           type: 'text',
           title: 'New Element',
           content: 'New element content',
-          isPublished: false
+          isPublished: true
         })
       });
       
