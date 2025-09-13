@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Loader2, CheckCircle, AlertCircle, Copy, Trash2, GripVertical, ChevronUp, ChevronDown } from 'lucide-react';
+import { Loader2, CheckCircle, AlertCircle, Copy, Trash2, GripVertical, ChevronUp, ChevronDown, Plus, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Admin() {
@@ -594,6 +594,119 @@ export default function Admin() {
     reorderElements(elementOrders);
   };
 
+  // Create and delete functions
+  const createNewSection = async () => {
+    if (!selectedPage) return;
+    
+    try {
+      const response = await fetch('/api/admin/sections', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          pageId: selectedPage,
+          type: 'content',
+          title: 'New Section',
+          content: 'New section content',
+          isPublished: false
+        })
+      });
+      
+      if (response.ok) {
+        setSuccessMessage('Section created successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        loadPageContent(selectedPage);
+      } else {
+        setErrorMessage('Failed to create section. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to create section:', err);
+      setErrorMessage('Failed to create section. Please try again.');
+    }
+  };
+
+  const deleteSection = async (sectionId: string) => {
+    try {
+      const response = await fetch(`/api/admin/sections/${sectionId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      
+      if (response.ok) {
+        setSuccessMessage('Section deleted successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        if (selectedPage) {
+          loadPageContent(selectedPage);
+        }
+      } else {
+        setErrorMessage('Failed to delete section. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to delete section:', err);
+      setErrorMessage('Failed to delete section. Please try again.');
+    }
+  };
+
+  const createNewElement = async (sectionId: string) => {
+    try {
+      const response = await fetch('/api/admin/elements', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sectionId: sectionId,
+          type: 'text',
+          title: 'New Element',
+          content: 'New element content',
+          isPublished: false
+        })
+      });
+      
+      if (response.ok) {
+        setSuccessMessage('Element created successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        if (selectedPage) {
+          loadPageContent(selectedPage);
+        }
+      } else {
+        setErrorMessage('Failed to create element. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to create element:', err);
+      setErrorMessage('Failed to create element. Please try again.');
+    }
+  };
+
+  const deleteElement = async (elementId: string) => {
+    try {
+      const response = await fetch(`/api/admin/elements/${elementId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${authToken}`
+        }
+      });
+      
+      if (response.ok) {
+        setSuccessMessage('Element deleted successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        if (selectedPage) {
+          loadPageContent(selectedPage);
+        }
+      } else {
+        setErrorMessage('Failed to delete element. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to delete element:', err);
+      setErrorMessage('Failed to delete element. Please try again.');
+    }
+  };
+
   useEffect(() => {
     if (isAuthenticated) {
       loadResearchStatusOptions();
@@ -1020,6 +1133,20 @@ export default function Admin() {
             </div>
           ) : pageContent && pageContent.sections ? (
             <div className="flex flex-col gap-6">
+              {/* Header with Create Section Button */}
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-foreground">Page Sections</h3>
+                <Button
+                  onClick={createNewSection}
+                  variant="default"
+                  size="sm"
+                  data-testid="button-create-section"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create New Section
+                </Button>
+              </div>
+
               {/* Bulk Operations Bar */}
               {(selectedSections.size > 0 || selectedElements.size > 0) && (
                 <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded">
@@ -1136,6 +1263,15 @@ export default function Admin() {
                         <Copy className="mr-2 h-4 w-4" />
                         Duplicate
                       </Button>
+                      <Button
+                        onClick={() => deleteSection(section.id)}
+                        variant="destructive"
+                        size="sm"
+                        data-testid={`button-delete-section-${section.id}`}
+                      >
+                        <X className="mr-2 h-4 w-4" />
+                        Delete
+                      </Button>
                     </div>
                   </div>
                   
@@ -1216,6 +1352,15 @@ export default function Admin() {
                               >
                                 <Copy className="mr-1 h-3 w-3" />
                                 Duplicate
+                              </Button>
+                              <Button
+                                onClick={() => deleteElement(element.id)}
+                                variant="destructive"
+                                size="sm"
+                                data-testid={`button-delete-element-${element.id}`}
+                              >
+                                <X className="mr-1 h-3 w-3" />
+                                Delete
                               </Button>
                             </div>
                           </div>
