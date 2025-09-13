@@ -1,10 +1,141 @@
 import { storage } from "./storage";
 
+// Ensure content element type definitions exist
+async function ensureContentElementTypeDefinitions() {
+  const definitions = [
+    {
+      typeName: "paragraph",
+      displayName: "Paragraph",
+      description: "Simple text paragraph element",
+      metadataSchema: { type: "object", properties: {}, additionalProperties: false },
+      defaultValues: {}
+    },
+    {
+      typeName: "skill_card",
+      displayName: "Skill Card",
+      description: "Card displaying a skill category with technologies",
+      metadataSchema: { 
+        type: "object", 
+        properties: { 
+          icon: { type: "string", description: "Optional Lucide icon name" } 
+        }, 
+        additionalProperties: false 
+      },
+      defaultValues: { icon: "" }
+    },
+    {
+      typeName: "experience_entry",
+      displayName: "Experience Entry",
+      description: "Professional experience entry with company and period",
+      metadataSchema: { 
+        type: "object", 
+        properties: { 
+          company: { type: "string" }, 
+          period: { type: "string" } 
+        }, 
+        required: ["company", "period"], 
+        additionalProperties: false 
+      },
+      defaultValues: { company: "", period: "" }
+    },
+    {
+      typeName: "project_card",
+      displayName: "Project Card", 
+      description: "Project showcase card with technologies and links",
+      metadataSchema: { 
+        type: "object", 
+        properties: { 
+          technologies: { type: "array", items: { type: "string" } }, 
+          links: { 
+            type: "object", 
+            properties: { 
+              demo: { type: "string", format: "uri" }, 
+              github: { type: "string", format: "uri" } 
+            }, 
+            additionalProperties: false 
+          }, 
+          isFeatured: { type: "boolean" } 
+        }, 
+        required: ["technologies"], 
+        additionalProperties: false 
+      },
+      defaultValues: { technologies: [], links: { demo: "", github: "" }, isFeatured: false }
+    },
+    {
+      typeName: "research_interest",
+      displayName: "Research Interest",
+      description: "Research area or topic of interest", 
+      metadataSchema: { 
+        type: "object", 
+        properties: { 
+          keywords: { type: "array", items: { type: "string" } } 
+        }, 
+        additionalProperties: false 
+      },
+      defaultValues: { keywords: [] }
+    },
+    {
+      typeName: "publication",
+      displayName: "Publication",
+      description: "Academic publication entry with citation details",
+      metadataSchema: { 
+        type: "object", 
+        properties: { 
+          authors: { type: "string" }, 
+          venue: { type: "string" }, 
+          doiUrl: { type: "string", format: "uri" },
+          citation: { type: "string" }
+        }, 
+        required: ["authors", "venue"], 
+        additionalProperties: false 
+      },
+      defaultValues: { authors: "", venue: "", doiUrl: "", citation: "" }
+    },
+    {
+      typeName: "research_project",
+      displayName: "Research Project",
+      description: "Ongoing research project with status and details",
+      metadataSchema: { 
+        type: "object", 
+        properties: { 
+          status: { type: "string" }, 
+          tags: { type: "array", items: { type: "string" } }
+        }, 
+        required: ["status"], 
+        additionalProperties: false 
+      },
+      defaultValues: { status: "Ongoing", tags: [] }
+    }
+  ];
+
+  for (const def of definitions) {
+    try {
+      // Check if definition already exists
+      const existing = await storage.getContentElementTypeDefinitionByName(def.typeName);
+      if (!existing) {
+        await storage.createContentElementTypeDefinition({
+          typeName: def.typeName,
+          displayName: def.displayName,
+          description: def.description,
+          metadataSchema: def.metadataSchema,
+          defaultValues: def.defaultValues,
+          isActive: true
+        });
+        console.log(`Created element type definition: ${def.typeName}`);
+      }
+    } catch (error) {
+      console.warn(`Failed to create element type definition ${def.typeName}:`, error);
+    }
+  }
+}
+
 // Migration script to import existing static content into CMS
 export async function migrateContent() {
   console.log("Starting content migration...");
 
   try {
+    // Ensure content element type definitions exist first
+    await ensureContentElementTypeDefinitions();
     // Create Home page
     const homePage = await storage.createPage({
       slug: "home",
