@@ -90,6 +90,9 @@ export default function Admin() {
   const [newElementContent, setNewElementContent] = useState<string>('');
   const [creatingElement, setCreatingElement] = useState<boolean>(false);
 
+  // Element editing state
+  const [editElementType, setEditElementType] = useState<string>('');
+
   const clearMessages = () => {
     setSuccessMessage('');
     setErrorMessage('');
@@ -926,10 +929,10 @@ export default function Admin() {
     }
   };
 
-  const updateElement = async (elementId: string, title: string, content: string, metadata?: any) => {
+  const updateElement = async (elementId: string, title: string, content: string, type: string, metadata?: any) => {
     setSavingElement(elementId);
     try {
-      const updateData: any = { title, content };
+      const updateData: any = { title, content, type };
       if (metadata && Object.keys(metadata).length > 0) {
         updateData.metadata = metadata;
       }
@@ -947,6 +950,7 @@ export default function Admin() {
         setEditingElement(null);
         setEditContent('');
         setEditTitle('');
+        setEditElementType('');
         setEditMetadata({});
         setSuccessMessage('Element updated successfully!');
         setTimeout(() => setSuccessMessage(''), 3000);
@@ -1700,6 +1704,7 @@ export default function Admin() {
                                   setEditingElement(element.id);
                                   setEditContent(element.content || '');
                                   setEditTitle(element.title || '');
+                                  setEditElementType(element.type || '');
                                   setEditMetadata(element.metadata || {});
                                 }}
                                 variant="secondary"
@@ -1739,6 +1744,26 @@ export default function Admin() {
                             exit={{ opacity: 0, height: 0 }}
                             transition={{ duration: 0.3 }}
                           >
+                            <div className="mb-4">
+                              <Label htmlFor={`edit-element-type-${element.id}`} className="text-sm font-medium">
+                                Element Type
+                              </Label>
+                              <Select
+                                value={editElementType}
+                                onValueChange={setEditElementType}
+                              >
+                                <SelectTrigger className="mt-1" data-testid={`select-edit-element-type-${element.id}`}>
+                                  <SelectValue placeholder="Select element type..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {elementTypes.map((elementType) => (
+                                    <SelectItem key={elementType.id} value={elementType.typeName}>
+                                      {elementType.displayName}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
                             <Label htmlFor={`title-${element.id}`} className="sr-only">
                               Element Title
                             </Label>
@@ -1750,6 +1775,7 @@ export default function Admin() {
                               placeholder="Enter title..."
                               className="mb-4"
                               aria-label="Element title"
+                              data-testid={`input-edit-element-title-${element.id}`}
                             />
                             {element.type === 'experience_entry' && (
                               <>
@@ -1897,7 +1923,7 @@ export default function Admin() {
                             )}
                             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                               <Button
-                                onClick={() => updateElement(element.id, editTitle, editContent, editMetadata)}
+                                onClick={() => updateElement(element.id, editTitle, editContent, editElementType, editMetadata)}
                                 disabled={savingElement === element.id}
                                 size="sm"
                                 className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
@@ -1917,6 +1943,7 @@ export default function Admin() {
                                   setEditingElement(null);
                                   setEditContent('');
                                   setEditTitle('');
+                                  setEditElementType('');
                                   setEditMetadata({});
                                 }}
                                 variant="secondary"
