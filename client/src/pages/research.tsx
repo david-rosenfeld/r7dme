@@ -270,7 +270,44 @@ export default function Research() {
         );
 
       default:
-        return null;
+        // Generic fallback renderer for any unknown section types
+        return (
+          <motion.div
+            key={section.id}
+            className="mb-12"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 * sectionIndex }}
+          >
+            <h3 className="text-2xl font-semibold mb-6 text-foreground" data-testid={`text-section-title-${section.type}`}>
+              {section.title}
+            </h3>
+            {section.elements && section.elements.length > 0 ? (
+              <div className="space-y-4">
+                {section.elements.map((element: any, index: number) => (
+                  <motion.div
+                    key={element.id}
+                    className="bg-card p-4 rounded-lg border border-border"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 * index }}
+                  >
+                    <h4 className="text-lg font-semibold mb-2 text-foreground" data-testid={`text-element-title-${index}`}>
+                      {element.title}
+                    </h4>
+                    <div className="text-muted-foreground" data-testid={`text-element-content-${index}`}>
+                      {element.content}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-muted-foreground italic">
+                This section has no content yet.
+              </div>
+            )}
+          </motion.div>
+        );
     }
   };
 
