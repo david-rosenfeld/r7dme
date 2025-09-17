@@ -219,6 +219,7 @@ export default function Research() {
         return (
           <motion.div
             key={section.id}
+            className="mb-12"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 * sectionIndex }}
