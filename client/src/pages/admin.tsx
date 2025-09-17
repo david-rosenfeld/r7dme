@@ -325,7 +325,7 @@ export default function Admin() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          name: newElementTypeName,
+          typeName: newElementTypeName,
           displayName: newElementTypeDisplayName,
           description: newElementTypeDescription,
           allowedSectionTypes: newElementTypeAllowedSections,
@@ -350,6 +350,57 @@ export default function Admin() {
     } catch (err) {
       console.error('Failed to create element type:', err);
       setErrorMessage('Failed to create element type. Please try again.');
+    } finally {
+      setSavingElementType(null);
+    }
+  };
+
+  const updateElementType = async () => {
+    if (!editingElementType) return;
+    
+    setSavingElementType(editingElementType);
+    try {
+      let metadataSchema;
+      try {
+        metadataSchema = JSON.parse(newElementTypeMetadataSchema);
+      } catch (e) {
+        setErrorMessage('Invalid JSON in metadata schema.');
+        return;
+      }
+
+      const response = await fetch(`/api/admin/element-types/${editingElementType}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          typeName: newElementTypeName,
+          displayName: newElementTypeDisplayName,
+          description: newElementTypeDescription,
+          allowedSectionTypes: newElementTypeAllowedSections,
+          metadataSchema,
+          isActive: true
+        })
+      });
+      
+      if (response.ok) {
+        setEditingElementType(null);
+        setNewElementTypeName('');
+        setNewElementTypeDisplayName('');
+        setNewElementTypeDescription('');
+        setNewElementTypeAllowedSections([]);
+        setNewElementTypeMetadataSchema('{}');
+        setSuccessMessage('Element type updated successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        loadElementTypes();
+      } else {
+        const errorData = await response.json();
+        setErrorMessage(errorData.error || 'Failed to update element type. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to update element type:', err);
+      setErrorMessage('Failed to update element type. Please try again.');
     } finally {
       setSavingElementType(null);
     }
@@ -1807,9 +1858,11 @@ export default function Admin() {
                 <div className="space-y-6">
                   <h3 className="text-xl font-semibold text-foreground">Element Types</h3>
                   
-                  {/* Add New Element Type */}
+                  {/* Add/Edit Element Type Form */}
                   <div className="bg-muted p-6 rounded border border-border">
-                    <h4 className="text-lg font-semibold text-foreground mb-4">Add New Element Type</h4>
+                    <h4 className="text-lg font-semibold text-foreground mb-4">
+                      {editingElementType ? 'Edit Element Type' : 'Add New Element Type'}
+                    </h4>
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="new-element-type-name" className="text-sm font-medium">Name (identifier)</Label>
@@ -1853,21 +1906,58 @@ export default function Admin() {
                           data-testid="textarea-new-element-type-metadata-schema"
                         />
                       </div>
-                      <Button
-                        onClick={createElementType}
-                        disabled={!newElementTypeName || !newElementTypeDisplayName || savingElementType === 'new'}
-                        className="bg-green-600 hover:bg-green-700 w-full"
-                        data-testid="button-create-element-type"
-                      >
-                        {savingElementType === 'new' ? (
+                      <div className="flex gap-2">
+                        {editingElementType ? (
                           <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Creating...
+                            <Button
+                              onClick={updateElementType}
+                              disabled={!newElementTypeName || !newElementTypeDisplayName || savingElementType === editingElementType}
+                              className="bg-blue-600 hover:bg-blue-700 flex-1"
+                              data-testid="button-update-element-type"
+                            >
+                              {savingElementType === editingElementType ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Updating...
+                                </>
+                              ) : (
+                                'Update Element Type'
+                              )}
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setEditingElementType(null);
+                                setNewElementTypeName('');
+                                setNewElementTypeDisplayName('');
+                                setNewElementTypeDescription('');
+                                setNewElementTypeAllowedSections([]);
+                                setNewElementTypeMetadataSchema('{}');
+                              }}
+                              variant="secondary"
+                              className="flex-1"
+                              data-testid="button-cancel-edit-element-type"
+                            >
+                              Cancel
+                            </Button>
                           </>
                         ) : (
-                          'Add Element Type'
+                          <Button
+                            onClick={createElementType}
+                            disabled={!newElementTypeName || !newElementTypeDisplayName || savingElementType === 'new'}
+                            className="bg-green-600 hover:bg-green-700 w-full"
+                            data-testid="button-create-element-type"
+                          >
+                            {savingElementType === 'new' ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Creating...
+                              </>
+                            ) : (
+                              'Add Element Type'
+                            )}
+                          </Button>
                         )}
-                      </Button>
+                      </div>
                     </div>
                   </div>
 
@@ -1907,7 +1997,18 @@ export default function Admin() {
                               </div>
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="secondary" size="sm" data-testid={`button-edit-element-type-${elementType.id}`}>
+                              <Button 
+                                onClick={() => {
+                                  setEditingElementType(elementType.id);
+                                  setNewElementTypeName(elementType.typeName);
+                                  setNewElementTypeDisplayName(elementType.displayName);
+                                  setNewElementTypeDescription(elementType.description || '');
+                                  setNewElementTypeMetadataSchema(JSON.stringify(elementType.metadataSchema || {}, null, 2));
+                                }}
+                                variant="secondary" 
+                                size="sm" 
+                                data-testid={`button-edit-element-type-${elementType.id}`}
+                              >
                                 Edit
                               </Button>
                             </div>
