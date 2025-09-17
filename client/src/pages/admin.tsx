@@ -278,10 +278,10 @@ export default function Admin() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          name: newSectionTypeName,
+          typeName: newSectionTypeName,
           displayName: newSectionTypeDisplayName,
           description: newSectionTypeDescription,
-          layoutConfig,
+          defaultLayoutConfig: layoutConfig,
           isActive: true
         })
       });
@@ -301,6 +301,55 @@ export default function Admin() {
     } catch (err) {
       console.error('Failed to create section type:', err);
       setErrorMessage('Failed to create section type. Please try again.');
+    } finally {
+      setSavingSectionType(null);
+    }
+  };
+
+  const updateSectionType = async () => {
+    if (!editingSectionType) return;
+    
+    setSavingSectionType(editingSectionType);
+    try {
+      let layoutConfig;
+      try {
+        layoutConfig = JSON.parse(newSectionTypeLayoutConfig);
+      } catch (e) {
+        setErrorMessage('Invalid JSON in layout configuration.');
+        return;
+      }
+
+      const response = await fetch(`/api/admin/section-types/${editingSectionType}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          typeName: newSectionTypeName,
+          displayName: newSectionTypeDisplayName,
+          description: newSectionTypeDescription,
+          defaultLayoutConfig: layoutConfig,
+          isActive: true
+        })
+      });
+      
+      if (response.ok) {
+        setEditingSectionType(null);
+        setNewSectionTypeName('');
+        setNewSectionTypeDisplayName('');
+        setNewSectionTypeDescription('');
+        setNewSectionTypeLayoutConfig('{"columns": 1}');
+        setSuccessMessage('Section type updated successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        loadSectionTypes();
+      } else {
+        const errorData = await response.json();
+        setErrorMessage(errorData.error || 'Failed to update section type. Please try again.');
+      }
+    } catch (err) {
+      console.error('Failed to update section type:', err);
+      setErrorMessage('Failed to update section type. Please try again.');
     } finally {
       setSavingSectionType(null);
     }
@@ -1745,9 +1794,11 @@ export default function Admin() {
                 <div className="space-y-6">
                   <h3 className="text-xl font-semibold text-foreground">Section Types</h3>
                   
-                  {/* Add New Section Type */}
+                  {/* Add/Edit Section Type Form */}
                   <div className="bg-muted p-6 rounded border border-border">
-                    <h4 className="text-lg font-semibold text-foreground mb-4">Add New Section Type</h4>
+                    <h4 className="text-lg font-semibold text-foreground mb-4">
+                      {editingSectionType ? 'Edit Section Type' : 'Add New Section Type'}
+                    </h4>
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="new-section-type-name" className="text-sm font-medium">Name (identifier)</Label>
@@ -1791,21 +1842,57 @@ export default function Admin() {
                           data-testid="textarea-new-section-type-layout-config"
                         />
                       </div>
-                      <Button
-                        onClick={createSectionType}
-                        disabled={!newSectionTypeName || !newSectionTypeDisplayName || savingSectionType === 'new'}
-                        className="bg-green-600 hover:bg-green-700 w-full"
-                        data-testid="button-create-section-type"
-                      >
-                        {savingSectionType === 'new' ? (
+                      <div className="flex gap-2">
+                        {editingSectionType ? (
                           <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Creating...
+                            <Button
+                              onClick={updateSectionType}
+                              disabled={!newSectionTypeName || !newSectionTypeDisplayName || savingSectionType === editingSectionType}
+                              className="bg-blue-600 hover:bg-blue-700 flex-1"
+                              data-testid="button-update-section-type"
+                            >
+                              {savingSectionType === editingSectionType ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Updating...
+                                </>
+                              ) : (
+                                'Update Section Type'
+                              )}
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setEditingSectionType(null);
+                                setNewSectionTypeName('');
+                                setNewSectionTypeDisplayName('');
+                                setNewSectionTypeDescription('');
+                                setNewSectionTypeLayoutConfig('{"columns": 1}');
+                              }}
+                              variant="secondary"
+                              className="flex-1"
+                              data-testid="button-cancel-edit-section-type"
+                            >
+                              Cancel
+                            </Button>
                           </>
                         ) : (
-                          'Add Section Type'
+                          <Button
+                            onClick={createSectionType}
+                            disabled={!newSectionTypeName || !newSectionTypeDisplayName || savingSectionType === 'new'}
+                            className="bg-green-600 hover:bg-green-700 w-full"
+                            data-testid="button-create-section-type"
+                          >
+                            {savingSectionType === 'new' ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Creating...
+                              </>
+                            ) : (
+                              'Add Section Type'
+                            )}
+                          </Button>
                         )}
-                      </Button>
+                      </div>
                     </div>
                   </div>
 
@@ -1839,7 +1926,18 @@ export default function Admin() {
                               </div>
                             </div>
                             <div className="flex gap-2">
-                              <Button variant="secondary" size="sm" data-testid={`button-edit-section-type-${sectionType.id}`}>
+                              <Button 
+                                onClick={() => {
+                                  setEditingSectionType(sectionType.id);
+                                  setNewSectionTypeName(sectionType.typeName);
+                                  setNewSectionTypeDisplayName(sectionType.displayName);
+                                  setNewSectionTypeDescription(sectionType.description || '');
+                                  setNewSectionTypeLayoutConfig(JSON.stringify(sectionType.defaultLayoutConfig || {}, null, 2));
+                                }}
+                                variant="secondary" 
+                                size="sm" 
+                                data-testid={`button-edit-section-type-${sectionType.id}`}
+                              >
                                 Edit
                               </Button>
                             </div>
