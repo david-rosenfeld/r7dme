@@ -1,5 +1,101 @@
 import { storage } from "./storage";
 
+// Ensure section type definitions exist  
+async function ensureSectionTypeDefinitions() {
+  const definitions = [
+    {
+      typeName: "intro",
+      displayName: "Introduction",
+      description: "Introductory content section for homepage",
+      layoutConfig: { columns: 1 },
+      allowedContentTypes: ["paragraph"]
+    },
+    {
+      typeName: "hero", 
+      displayName: "Hero Section",
+      description: "Main heading/title section for pages",
+      layoutConfig: { columns: 1 },
+      allowedContentTypes: ["paragraph"]
+    },
+    {
+      typeName: "bio",
+      displayName: "Biography",
+      description: "Personal biography with multiple paragraphs", 
+      layoutConfig: { columns: 1 },
+      allowedContentTypes: ["paragraph"]
+    },
+    {
+      typeName: "skills",
+      displayName: "Skills & Technologies",
+      description: "Grid layout showcasing technical skills and technologies",
+      layoutConfig: { columns: 3 },
+      allowedContentTypes: ["skill_card"]
+    },
+    {
+      typeName: "experience", 
+      displayName: "Professional Experience",
+      description: "Timeline of work experience and positions",
+      layoutConfig: { columns: 1 },
+      allowedContentTypes: ["experience_entry"]
+    },
+    {
+      typeName: "projects",
+      displayName: "Featured Projects", 
+      description: "Showcase of main projects with Netflix-style hover effects",
+      layoutConfig: { columns: 1 },
+      allowedContentTypes: ["project_card"]
+    },
+    {
+      typeName: "projects_other",
+      displayName: "Other Projects",
+      description: "Additional projects in grid layout",
+      layoutConfig: { columns: 2 },
+      allowedContentTypes: ["project_card"]
+    },
+    {
+      typeName: "research_interests",
+      displayName: "Research Interests", 
+      description: "Current areas of research focus",
+      layoutConfig: { columns: 2 },
+      allowedContentTypes: ["research_interest"]
+    },
+    {
+      typeName: "publications",
+      displayName: "Publications",
+      description: "Academic publications with citation details",
+      layoutConfig: { columns: 1 },
+      allowedContentTypes: ["publication"]
+    },
+    {
+      typeName: "ongoing_projects",
+      displayName: "Ongoing Research Projects",
+      description: "Current research projects with status tracking",
+      layoutConfig: { columns: 1 },
+      allowedContentTypes: ["research_project"]
+    }
+  ];
+
+  for (const def of definitions) {
+    try {
+      // Check if definition already exists
+      const existing = await storage.getSectionTypeDefinitionByName(def.typeName);
+      if (!existing) {
+        await storage.createSectionTypeDefinition({
+          typeName: def.typeName,
+          displayName: def.displayName,
+          description: def.description,
+          defaultLayoutConfig: def.layoutConfig,
+          allowedContentTypes: def.allowedContentTypes,
+          isActive: true
+        });
+        console.log(`Created section type definition: ${def.typeName}`);
+      }
+    } catch (error) {
+      console.warn(`Failed to create section type definition ${def.typeName}:`, error);
+    }
+  }
+}
+
 // Ensure content element type definitions exist
 async function ensureContentElementTypeDefinitions() {
   const definitions = [
@@ -134,6 +230,8 @@ export async function migrateContent() {
   console.log("Starting content migration...");
 
   try {
+    // Ensure section type definitions exist first
+    await ensureSectionTypeDefinitions();
     // Ensure content element type definitions exist first
     await ensureContentElementTypeDefinitions();
     // Create Home page
