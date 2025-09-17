@@ -696,7 +696,7 @@ export default function Admin() {
 
   // Create and delete functions
   const createNewSection = async () => {
-    if (!selectedPage) {
+    if (!selectedPage || !pageContent) {
       setErrorMessage('Please select a page first.');
       return;
     }
@@ -714,7 +714,7 @@ export default function Admin() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          pageId: selectedPage,
+          pageId: pageContent.id, // Use the actual page ID, not the slug
           type: 'content',
           title: 'New Section',
           order: 999, // Put new sections at the end
