@@ -1246,9 +1246,11 @@ export default function Admin() {
                 <h3 className="text-lg font-semibold text-foreground">Page Sections</h3>
                 <Button
                   onClick={createNewSection}
+                  disabled={!selectedPage}
                   variant="default"
                   size="sm"
                   data-testid="button-create-section"
+                  title={!selectedPage ? "Please select a page first" : "Create a new section for this page"}
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Create New Section
