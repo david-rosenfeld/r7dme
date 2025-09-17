@@ -140,6 +140,7 @@ export const insertContentElementTypeDefinitionSchema = createInsertSchema(conte
 export const updatePageSchema = insertPageSchema.partial();
 export const updatePageSectionSchema = insertPageSectionSchema.partial().omit({ pageId: true });
 export const updateContentElementSchema = insertContentElementSchema.partial().omit({ sectionId: true });
+// Note: type field is now included to allow changing element types
 export const updateSiteSettingSchema = insertSiteSettingSchema.partial().omit({ key: true });
 export const updateDropdownOptionSchema = insertDropdownOptionSchema.partial().omit({ fieldName: true });
 export const updateSectionTypeDefinitionSchema = insertSectionTypeDefinitionSchema.partial().omit({ typeName: true });
