@@ -83,6 +83,13 @@ export default function Admin() {
   const [editSectionType, setEditSectionType] = useState<string>('');
   const [savingSection, setSavingSection] = useState<string | null>(null);
 
+  // New element form state
+  const [addingElementToSection, setAddingElementToSection] = useState<string | null>(null);
+  const [newElementType, setNewElementType] = useState<string>('');
+  const [newElementTitle, setNewElementTitle] = useState<string>('');
+  const [newElementContent, setNewElementContent] = useState<string>('');
+  const [creatingElement, setCreatingElement] = useState<boolean>(false);
+
   const clearMessages = () => {
     setSuccessMessage('');
     setErrorMessage('');
@@ -773,7 +780,8 @@ export default function Admin() {
     }
   };
 
-  const createNewElement = async (sectionId: string) => {
+  const createNewElement = async (sectionId: string, type: string, title: string, content: string) => {
+    setCreatingElement(true);
     try {
       const response = await fetch('/api/admin/elements', {
         method: 'POST',
@@ -783,14 +791,19 @@ export default function Admin() {
         },
         body: JSON.stringify({
           sectionId: sectionId,
-          type: 'text',
-          title: 'New Element',
-          content: 'New element content',
+          type: type,
+          title: title || 'New Element',
+          content: content || 'New element content',
           isPublished: true
         })
       });
       
       if (response.ok) {
+        // Reset form state
+        setAddingElementToSection(null);
+        setNewElementType('');
+        setNewElementTitle('');
+        setNewElementContent('');
         setSuccessMessage('Element created successfully!');
         setTimeout(() => setSuccessMessage(''), 3000);
         if (selectedPage) {
@@ -802,6 +815,8 @@ export default function Admin() {
     } catch (err) {
       console.error('Failed to create element:', err);
       setErrorMessage('Failed to create element. Please try again.');
+    } finally {
+      setCreatingElement(false);
     }
   };
 
@@ -1522,17 +1537,109 @@ export default function Admin() {
                   )}
                   
                   <div className="flex flex-col gap-6">
-                    {/* Add Element Button */}
-                    <div className="flex justify-end">
-                      <Button
-                        onClick={() => createNewElement(section.id)}
-                        variant="outline"
-                        size="sm"
-                        data-testid={`button-create-element-${section.id}`}
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Element
-                      </Button>
+                    {/* Add Element Form */}
+                    <div className="flex flex-col gap-4">
+                      {addingElementToSection === section.id ? (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="bg-card p-4 rounded border border-border"
+                        >
+                          <h4 className="text-md font-semibold mb-4">Add New Element</h4>
+                          <div className="space-y-4">
+                            <div>
+                              <Label htmlFor={`new-element-type-${section.id}`} className="text-sm font-medium">
+                                Element Type
+                              </Label>
+                              <Select
+                                value={newElementType}
+                                onValueChange={setNewElementType}
+                              >
+                                <SelectTrigger className="mt-1" data-testid={`select-element-type-${section.id}`}>
+                                  <SelectValue placeholder="Select element type..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {elementTypes.map((elementType) => (
+                                    <SelectItem key={elementType.id} value={elementType.typeName}>
+                                      {elementType.displayName}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor={`new-element-title-${section.id}`} className="text-sm font-medium">
+                                Title
+                              </Label>
+                              <Input
+                                id={`new-element-title-${section.id}`}
+                                type="text"
+                                value={newElementTitle}
+                                onChange={(e) => setNewElementTitle(e.target.value)}
+                                placeholder="Enter element title..."
+                                className="mt-1"
+                                data-testid={`input-element-title-${section.id}`}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor={`new-element-content-${section.id}`} className="text-sm font-medium">
+                                Content
+                              </Label>
+                              <Textarea
+                                id={`new-element-content-${section.id}`}
+                                value={newElementContent}
+                                onChange={(e) => setNewElementContent(e.target.value)}
+                                placeholder="Enter element content..."
+                                className="mt-1 min-h-24"
+                                data-testid={`textarea-element-content-${section.id}`}
+                              />
+                            </div>
+                            <div className="flex gap-2 pt-2">
+                              <Button
+                                onClick={() => createNewElement(section.id, newElementType, newElementTitle, newElementContent)}
+                                disabled={!newElementType || creatingElement}
+                                className="bg-green-600 hover:bg-green-700"
+                                data-testid={`button-save-new-element-${section.id}`}
+                              >
+                                {creatingElement ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Creating...
+                                  </>
+                                ) : (
+                                  'Create Element'
+                                )}
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  setAddingElementToSection(null);
+                                  setNewElementType('');
+                                  setNewElementTitle('');
+                                  setNewElementContent('');
+                                }}
+                                variant="secondary"
+                                data-testid={`button-cancel-new-element-${section.id}`}
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ) : (
+                        <div className="flex justify-end">
+                          <Button
+                            onClick={() => setAddingElementToSection(section.id)}
+                            variant="outline"
+                            size="sm"
+                            data-testid={`button-create-element-${section.id}`}
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Element
+                          </Button>
+                        </div>
+                      )}
                     </div>
 
                     {section.elements.map((element: any, elementIndex: number) => (
