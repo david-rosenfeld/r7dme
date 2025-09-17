@@ -719,7 +719,15 @@ export default function Admin() {
         setTimeout(() => setSuccessMessage(''), 3000);
         loadPageContent(selectedPage);
       } else {
-        setErrorMessage('Failed to create section. Please try again.');
+        const errorData = await response.json();
+        console.error('Failed to create section:', errorData);
+        if (response.status === 401) {
+          setErrorMessage('Authentication expired. Please log in again.');
+          setIsAuthenticated(false);
+          setAuthToken('');
+        } else {
+          setErrorMessage(errorData.error || 'Failed to create section. Please try again.');
+        }
       }
     } catch (err) {
       console.error('Failed to create section:', err);
