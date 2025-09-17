@@ -696,9 +696,25 @@ export default function Admin() {
 
   // Create and delete functions
   const createNewSection = async () => {
-    if (!selectedPage) return;
+    console.log('createNewSection called');
+    console.log('selectedPage:', selectedPage);
+    console.log('authToken:', authToken ? 'present' : 'missing');
+    console.log('isAuthenticated:', isAuthenticated);
+    
+    if (!selectedPage) {
+      console.log('No page selected, returning');
+      setErrorMessage('Please select a page first.');
+      return;
+    }
+    
+    if (!authToken) {
+      console.log('No auth token, returning');
+      setErrorMessage('Please log in first.');
+      return;
+    }
     
     try {
+      console.log('Making API call to create section...');
       const response = await fetch('/api/admin/sections', {
         method: 'POST',
         headers: {
@@ -714,7 +730,10 @@ export default function Admin() {
         })
       });
       
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
+        console.log('Section created successfully');
         setSuccessMessage('Section created successfully!');
         setTimeout(() => setSuccessMessage(''), 3000);
         loadPageContent(selectedPage);
