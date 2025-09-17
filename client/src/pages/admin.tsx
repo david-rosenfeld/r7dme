@@ -76,6 +76,12 @@ export default function Admin() {
   const [selectedSections, setSelectedSections] = useState<Set<string>>(new Set());
   const [selectedElements, setSelectedElements] = useState<Set<string>>(new Set());
   const [bulkOperationLoading, setBulkOperationLoading] = useState<boolean>(false);
+  
+  // Section editing state
+  const [editingSection, setEditingSection] = useState<string | null>(null);
+  const [editSectionTitle, setEditSectionTitle] = useState<string>('');
+  const [editSectionType, setEditSectionType] = useState<string>('');
+  const [savingSection, setSavingSection] = useState<string | null>(null);
 
   const clearMessages = () => {
     setSuccessMessage('');
@@ -943,6 +949,49 @@ export default function Admin() {
     }
   };
 
+  const updateSection = async (sectionId: string, title: string, type: string) => {
+    setSavingSection(sectionId);
+    try {
+      const response = await fetch(`/api/admin/sections/${sectionId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title,
+          type
+        })
+      });
+      
+      if (response.ok) {
+        setEditingSection(null);
+        setEditSectionTitle('');
+        setEditSectionType('');
+        setSuccessMessage('Section updated successfully!');
+        setTimeout(() => setSuccessMessage(''), 3000);
+        if (selectedPage) {
+          loadPageContent(selectedPage);
+        }
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to update section:', errorData);
+        if (response.status === 401) {
+          setErrorMessage('Authentication expired. Please log in again.');
+          setIsAuthenticated(false);
+          setAuthToken('');
+        } else {
+          setErrorMessage(errorData.error || 'Failed to update section. Please try again.');
+        }
+      }
+    } catch (err) {
+      console.error('Failed to update section:', err);
+      setErrorMessage('Failed to update section. Please try again.');
+    } finally {
+      setSavingSection(null);
+    }
+  };
+
   const updateSetting = async (key: string, value: string) => {
     setSavingSetting(key);
     try {
@@ -1373,6 +1422,18 @@ export default function Admin() {
                         </Button>
                       </div>
                       <Button
+                        onClick={() => {
+                          setEditingSection(section.id);
+                          setEditSectionTitle(section.title || '');
+                          setEditSectionType(section.type || '');
+                        }}
+                        variant="secondary"
+                        size="sm"
+                        data-testid={`button-edit-section-${section.id}`}
+                      >
+                        Edit
+                      </Button>
+                      <Button
                         onClick={() => duplicateSection(section.id, pageContent.id)}
                         variant="secondary"
                         size="sm"
@@ -1392,6 +1453,73 @@ export default function Admin() {
                       </Button>
                     </div>
                   </div>
+                  
+                  {/* Section Edit Form */}
+                  {editingSection === section.id && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-card p-4 rounded border border-border mb-4"
+                    >
+                      <h4 className="text-md font-semibold mb-4">Edit Section</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor={`section-title-${section.id}`} className="text-sm font-medium">
+                            Section Title
+                          </Label>
+                          <Input
+                            id={`section-title-${section.id}`}
+                            type="text"
+                            value={editSectionTitle}
+                            onChange={(e) => setEditSectionTitle(e.target.value)}
+                            placeholder="Enter section title..."
+                            className="mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`section-type-${section.id}`} className="text-sm font-medium">
+                            Section Type
+                          </Label>
+                          <Input
+                            id={`section-type-${section.id}`}
+                            type="text"
+                            value={editSectionType}
+                            onChange={(e) => setEditSectionType(e.target.value)}
+                            placeholder="Enter section type..."
+                            className="mt-1"
+                          />
+                        </div>
+                        <div className="flex gap-2 pt-2">
+                          <Button
+                            onClick={() => updateSection(section.id, editSectionTitle, editSectionType)}
+                            disabled={savingSection === section.id}
+                            className="bg-blue-600 hover:bg-blue-700"
+                          >
+                            {savingSection === section.id ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              'Save Changes'
+                            )}
+                          </Button>
+                          <Button
+                            onClick={() => {
+                              setEditingSection(null);
+                              setEditSectionTitle('');
+                              setEditSectionType('');
+                            }}
+                            variant="secondary"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                   
                   <div className="flex flex-col gap-6">
                     {/* Add Element Button */}
