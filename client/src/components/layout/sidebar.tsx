@@ -168,10 +168,12 @@ export function Sidebar({ className }: SidebarProps) {
               <SiX className="w-6 h-6" />
             </motion.a>
             </div>
-            <div className="flex flex-col gap-2">
-              <ColorToggle />
-              <HoverEffectsToggle />
-            </div>
+            {location === '/admin' && (
+              <div className="flex flex-col gap-2">
+                <ColorToggle />
+                <HoverEffectsToggle />
+              </div>
+            )}
           </div>
         </div>
       </motion.div>
